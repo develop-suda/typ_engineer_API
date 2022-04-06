@@ -8,7 +8,7 @@ import (
     "github.com/joho/godotenv"
 )
 
-func dbConnect() *gorm.DB {
+func DbConnect() *gorm.DB {
 
 	// ここで.envファイル全体を読み込みます。
 	// この読み込み処理がないと、個々の環境変数が取得出来ません。

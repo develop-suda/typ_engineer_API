@@ -12,9 +12,18 @@ CREATE TABLE `words` (
   `word` varchar(256) NOT NULL,
   `parts_of_speech` varchar(256),
   `discription` varchar(256) NOT NULL,
-  `level` varchar(256) NOT NULL,
+  `level_id` int(11) NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT false,
   PRIMARY KEY (`word`)
+) ENGINE=InnoDB AUTO_INCREMENT=8;
+
+CREATE TABLE `levels` (
+  `level_id` int(11) NOT NULL,
+  `level` varchar(256) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT false,
+  PRIMARY KEY (`level_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8;
