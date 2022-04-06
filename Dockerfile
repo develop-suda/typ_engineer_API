@@ -26,8 +26,7 @@ RUN go get github.com/golangci/golangci-lint/cmd/golangci-lint
 RUN go get golang.org/x/tools/gopls
 # div-dap のインストール方法は次のドキュメントを参考にしました:
 # https://github.com/golang/vscode-go/blob/v0.26.0/docs/dlv-dap.md#updating-dlv-dap
-RUN GOBIN=/tmp/ go get github.com/go-delve/delve/cmd/dlv@master \
- && mv /tmp/dlv $GOPATH/bin/dlv-dap
+RUN GOBIN=/tmp/ go get github.com/go-delve/delve/cmd/dlv@master
 RUN go get -u github.com/jinzhu/gorm
 RUN go get -u github.com/go-sql-driver/mysql
 RUN go get -u github.com/joho/godotenv
