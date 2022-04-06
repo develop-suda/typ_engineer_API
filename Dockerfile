@@ -1,5 +1,5 @@
 # ベースとなるDockerイメージ指定
-FROM golang:1.17 as build
+FROM golang:1.18 as build
 
 ENV GOROOT=/usr/local/go
 ENV GOPATH=/go

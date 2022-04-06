@@ -13,7 +13,7 @@ type word struct {
 }
 
 type level struct {
-    Level string `json:"level"`
+    Level_id int `json:"level"`
 }
 
 func DbSelect(db *gorm.DB, urlParams string) *gorm.DB {
@@ -44,7 +44,7 @@ func GetLevels(db *gorm.DB, urlParams string) *gorm.DB {
     // 複数件取得する場合、構造体を配列にする
     var levels []level
 
-    sql := "SELECT level FROM words GROUP BY level"
+    sql := "SELECT level_id FROM words GROUP BY level_id"
 
     result := db.Raw(sql).Find(&levels)
     return result
