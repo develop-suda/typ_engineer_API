@@ -16,6 +16,12 @@ type level struct {
     Level_id int `json:"level"`
 }
 
+type user struct {
+    Name string
+    Email string
+    Phone_number string
+}
+
 func DbSelect(db *gorm.DB, urlParams string) *gorm.DB {
 
     // 複数件取得する場合、構造体を配列にする
@@ -47,5 +53,12 @@ func GetLevels(db *gorm.DB, urlParams string) *gorm.DB {
     sql := "SELECT level_id FROM words GROUP BY level_id"
 
     result := db.Raw(sql).Find(&levels)
+    return result
+}
+
+func GetUsers(db *gorm.DB) *gorm.DB {
+    var users []user
+
+    result := db.Find(&users)
     return result
 }

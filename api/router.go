@@ -8,5 +8,6 @@ import (
 func Router() {
 	http.HandleFunc("/api", handler.SelectWordsHandler)
     http.HandleFunc("/api/levels", handler.GetLevelsHandler)
+	http.HandleFunc("/api/userRegist", handler.UserRegistHandler)
 	http.ListenAndServe(":8888", nil)
 }
