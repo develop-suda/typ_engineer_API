@@ -7,7 +7,7 @@ SET @old_autocommit=@@autocommit;
 
 USE db_typ_engineer;
 
-INSERT INTO `words` (`word`, `parts_of_speech`, `discription`,  `level_id`  , `created_at`, `updated_at`, `is_deleted`) VALUES
+INSERT INTO `words` (`word`, `parts_of_speech`, `description`,  `level_id`  , `created_at`, `updated_at`, `is_deleted`) VALUES
 ('accept','動詞','受諾する、受け入れる','1', cast( now() as datetime), cast( now() as datetime), false),
 ('access','動詞／名詞','アクセスする、利用する、入手する／アクセス','1', cast( now() as datetime), cast( now() as datetime), false),
 ('account','名詞','アカウント、口座','1', cast( now() as datetime), cast( now() as datetime), false),
@@ -309,7 +309,7 @@ INSERT INTO `words` (`word`, `parts_of_speech`, `discription`,  `level_id`  , `c
 ('width','名詞','幅','1', cast( now() as datetime), cast( now() as datetime), false),
 ('wizard','名詞','ウィザード','1', cast( now() as datetime), cast( now() as datetime), false);
 
-INSERT INTO `words` (`word`, `parts_of_speech`, `discription`,  `level_id`  , `created_at`, `updated_at`, `is_deleted`) VALUES
+INSERT INTO `words` (`word`, `parts_of_speech`, `description`,  `level_id`  , `created_at`, `updated_at`, `is_deleted`) VALUES
 ('abstract','形容詞','抽象的な、抽象の','2', cast( now() as datetime), cast( now() as datetime), false),
 ('accessibility','名詞','アクセシビリティー','2', cast( now() as datetime), cast( now() as datetime), false),
 ('accessible','形容詞','アクセス可能な、利用可能な','2', cast( now() as datetime), cast( now() as datetime), false),
@@ -611,7 +611,7 @@ INSERT INTO `words` (`word`, `parts_of_speech`, `discription`,  `level_id`  , `c
 ('wrapper','名詞','ラッパー','2', cast( now() as datetime), cast( now() as datetime), false),
 ('zip','動詞','（ファイルを）圧縮する','2', cast( now() as datetime), cast( now() as datetime), false);
 
-INSERT INTO `words` (`word`, `parts_of_speech`, `discription`,  `level_id`  , `created_at`, `updated_at`, `is_deleted`) VALUES
+INSERT INTO `words` (`word`, `parts_of_speech`, `description`,  `level_id`  , `created_at`, `updated_at`, `is_deleted`) VALUES
 ('action','名詞','アクション、操作','3', cast( now() as datetime), cast( now() as datetime), false),
 ('activity','名詞','アクティビティー、活動','3', cast( now() as datetime), cast( now() as datetime), false),
 ('add','動詞','追加する','3', cast( now() as datetime), cast( now() as datetime), false),

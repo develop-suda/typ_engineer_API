@@ -11,7 +11,7 @@ USE db_typ_engineer;
 CREATE TABLE `words` (
   `word` varchar(256) NOT NULL,
   `parts_of_speech` varchar(256),
-  `discription` varchar(256) NOT NULL,
+  `description` varchar(256) NOT NULL,
   `level_id` int(11) NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,

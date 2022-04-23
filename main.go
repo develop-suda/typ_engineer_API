@@ -1,9 +1,9 @@
 package main
 
 import (
-    "github.com/develop-suda/typ_engineer_API/api"
+	router "github.com/develop-suda/typ_engineer_API/api"
 )
 
 func main() {
-    router.Router()
+	router.Router()
 }
