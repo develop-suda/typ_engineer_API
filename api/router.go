@@ -12,4 +12,5 @@ func Router() {
 	http.HandleFunc("/api/userRegist", handler.UserRegistHandler)
 	http.ListenAndServe(":8888", nil)
 	//jiraテスト
+	//jiraブランチテスト
 }
