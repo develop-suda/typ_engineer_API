@@ -28,7 +28,7 @@ func DbSelect(db *gorm.DB, urlParams string) *gorm.DB {
 	// 複数件取得する場合、構造体を配列にする
 	var words []word
 
-	sql := "SELECT word, parts_of_speech, Description FROM words WHERE 1 = 1"
+	sql := "SELECT word, parts_of_speech, description FROM words WHERE 1 = 1"
 	u, err := url.Parse(urlParams)
 	if err != nil {
 		log.Fatal(err)
