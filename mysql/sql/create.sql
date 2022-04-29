@@ -11,7 +11,7 @@ USE db_typ_engineer;
 CREATE TABLE `words` (
   `word` varchar(256) NOT NULL,
   `parts_of_speech` varchar(256),
-  `discription` varchar(256) NOT NULL,
+  `description` varchar(256) NOT NULL,
   `level_id` int(11) NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
@@ -27,3 +27,13 @@ CREATE TABLE `levels` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT false,
   PRIMARY KEY (`level_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8;
+
+CREATE TABLE `users` (
+  `name` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone_number` varchar(11) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`name`,`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
