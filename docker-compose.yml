@@ -12,7 +12,7 @@ services:
       - default
   mysql:
     container_name: mysql_container
-    image: mysql:latest
+    image: mysql:8.0.29
     ports:
       - '3306:3306'
     environment:
