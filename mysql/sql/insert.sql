@@ -7,14 +7,14 @@ SET @old_autocommit=@@autocommit;
 
 USE db_typ_engineer;
 
-INSERT INTO `types` (`type_id` ,`type`, `created_at`, `updated_at`, `is_deleted`) VALUES
+INSERT INTO `word_types` (`word_type_id` ,`word_type`, `created_at`, `updated_at`, `is_deleted`) VALUES
 ('1','basic', cast( now() as datetime), cast( now() as datetime), false),
 ('2','advance', cast( now() as datetime), cast( now() as datetime), false),
 ('3','beginner', cast( now() as datetime), cast( now() as datetime), false),
 ('4','abbreviation', cast( now() as datetime), cast( now() as datetime), false),
 ('5','initials', cast( now() as datetime), cast( now() as datetime), false);
 
-INSERT INTO `parts_of_speechs` (`parts_of_speech_id` ,`parts_of_speech`, `created_at`, `updated_at`, `is_deleted`) VALUES
+INSERT INTO `parts_of_speeches` (`parts_of_speech_id` ,`parts_of_speech`, `created_at`, `updated_at`, `is_deleted`) VALUES
 ('1','名詞', cast( now() as datetime), cast( now() as datetime), false),
 ('2','代名詞', cast( now() as datetime), cast( now() as datetime), false),
 ('3','動詞', cast( now() as datetime), cast( now() as datetime), false),
@@ -32,7 +32,7 @@ INSERT INTO `parts_of_speechs` (`parts_of_speech_id` ,`parts_of_speech`, `create
 ('15','名詞／形容詞', cast( now() as datetime), cast( now() as datetime), false),
 ('0','なし', cast( now() as datetime), cast( now() as datetime), false);
 
-INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `type_id`  ,`created_at`, `updated_at`, `is_deleted`) VALUES
+INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `word_type_id`  ,`created_at`, `updated_at`, `is_deleted`) VALUES
 ('accept','3','受諾する、受け入れる','1', cast( now() as datetime), cast( now() as datetime), false),
 ('access','13','アクセスする、利用する、入手する／アクセス','1', cast( now() as datetime), cast( now() as datetime), false),
 ('account','1','アカウント、口座','1', cast( now() as datetime), cast( now() as datetime), false),
@@ -334,7 +334,7 @@ INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `type_id`  ,`
 ('width','1','幅','1', cast( now() as datetime), cast( now() as datetime), false),
 ('wizard','1','ウィザード','1', cast( now() as datetime), cast( now() as datetime), false);
 
-INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `type_id`  ,`created_at`, `updated_at`, `is_deleted`) VALUES
+INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `word_type_id`  ,`created_at`, `updated_at`, `is_deleted`) VALUES
 ('abstract','4','抽象的な、抽象の','2', cast( now() as datetime), cast( now() as datetime), false),
 ('accessibility','1','アクセシビリティー','2', cast( now() as datetime), cast( now() as datetime), false),
 ('accessible','4','アクセス可能な、利用可能な','2', cast( now() as datetime), cast( now() as datetime), false),
@@ -636,7 +636,7 @@ INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `type_id`  ,`
 ('wrapper','1','ラッパー','2', cast( now() as datetime), cast( now() as datetime), false),
 ('zip','3','（ファイルを）圧縮する','2', cast( now() as datetime), cast( now() as datetime), false);
 
-INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `type_id`  ,`created_at`, `updated_at`, `is_deleted`) VALUES
+INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `word_type_id`  ,`created_at`, `updated_at`, `is_deleted`) VALUES
 ('action','1','アクション、操作','3', cast( now() as datetime), cast( now() as datetime), false),
 ('activity','1','アクティビティー、活動','3', cast( now() as datetime), cast( now() as datetime), false),
 ('add','3','追加する','3', cast( now() as datetime), cast( now() as datetime), false),
@@ -738,7 +738,7 @@ INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `type_id`  ,`
 ('you','2','あなた、ユーザー','3', cast( now() as datetime), cast( now() as datetime), false),
 ('your','2','あなたの、ユーザーの','3', cast( now() as datetime), cast( now() as datetime), false);
 
-INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `type_id`  ,`created_at`, `updated_at`, `is_deleted`) VALUES
+INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `word_type_id`  ,`created_at`, `updated_at`, `is_deleted`) VALUES
 ('addr','0','addressの略','4', cast( now() as datetime), cast( now() as datetime), false),
 ('admin','0','administratorの略','4', cast( now() as datetime), cast( now() as datetime), false),
 ('app','0','applicationの略','4', cast( now() as datetime), cast( now() as datetime), false),
@@ -810,7 +810,7 @@ INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `type_id`  ,`
 ('var','0','variableの略','4', cast( now() as datetime), cast( now() as datetime), false),
 ('vars','0','variablesの略','4', cast( now() as datetime), cast( now() as datetime), false);
 
-INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `type_id`  ,`created_at`, `updated_at`, `is_deleted`) VALUES
+INSERT INTO `words` (`word`, `parts_of_speech_id`, `description`,  `word_type_id`  ,`created_at`, `updated_at`, `is_deleted`) VALUES
 ('API','0','Application Programming Interfaceのこと','5', cast( now() as datetime), cast( now() as datetime), false),
 ('CI','0','Continuous Integrationのこと','5', cast( now() as datetime), cast( now() as datetime), false),
 ('CLI','0','Command Line Interfaceのこと','5', cast( now() as datetime), cast( now() as datetime), false),
