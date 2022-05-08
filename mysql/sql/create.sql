@@ -8,16 +8,16 @@ DROP SCHEMA IF EXISTS db_typ_engineer;
 CREATE SCHEMA db_typ_engineer;
 USE db_typ_engineer;
 
-CREATE TABLE `types` (
-  `type_id` int(255) NOT NULL UNIQUE,
-  `type` varchar(256) NOT NULL UNIQUE,
+CREATE TABLE `word_types` (
+  `word_type_id` int(255) NOT NULL UNIQUE,
+  `word_type` varchar(256) NOT NULL UNIQUE,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT false,
-  PRIMARY KEY (`type_id`)
+  PRIMARY KEY (`word_type_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8;
 
-CREATE TABLE `parts_of_speechs` (
+CREATE TABLE `parts_of_speeches` (
   `parts_of_speech_id` int(255) NOT NULL UNIQUE,
   `parts_of_speech` varchar(256) NOT NULL UNIQUE,
   `created_at` datetime NOT NULL,
@@ -30,13 +30,13 @@ CREATE TABLE `words` (
   `word` varchar(256) NOT NULL UNIQUE,
   `description` varchar(256) NOT NULL,
   `parts_of_speech_id` int(255) DEFAULT NULL,
-  `type_id` int(255) NOT NULL,
+  `word_type_id` int(255) NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT false,
   PRIMARY KEY (`word`),
-  FOREIGN KEY (`parts_of_speech_id`) REFERENCES `parts_of_speechs` (`parts_of_speech_id`),
-  FOREIGN KEY (`type_id`) REFERENCES `types` (`type_id`),
+  FOREIGN KEY (`parts_of_speech_id`) REFERENCES `parts_of_speeches` (`parts_of_speech_id`),
+  FOREIGN KEY (`word_type_id`) REFERENCES `word_types` (`word_type_id`),
   INDEX (`word`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8;
 
@@ -95,7 +95,7 @@ CREATE TABLE `my_options` (
   `option_id` int(255) NOT NULL AUTO_INCREMENT UNIQUE,
   `user_id`int(8) UNSIGNED ZEROFILL NOT NULL,
   `parts_of_speech_id` int(255) NOT NULL,
-  `type_id` int(255) NOT NULL,
+  `word_type_id` int(255) NOT NULL,
   `alphabet` varchar(1) NOT NULL,
   `quantity` int(255) NOT NULL,
   `created_at` datetime NOT NULL,

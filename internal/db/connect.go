@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/joho/godotenv"
+	"database/sql"
 )
 
-func DbConnect() *gorm.DB {
+func DbConnect() *sql.DB {
 
 	// ここで.envファイル全体を読み込みます。
 	// この読み込み処理がないと、個々の環境変数が取得出来ません。
@@ -31,7 +30,7 @@ func DbConnect() *gorm.DB {
 
 	CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME
 
-	db, err := gorm.Open(dbDriver, CONNECT)
+	db, err := sql.Open(dbDriver, CONNECT)
 
 	if err != nil {
 		panic(err.Error())
