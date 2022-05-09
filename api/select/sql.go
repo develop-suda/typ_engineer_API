@@ -1,10 +1,10 @@
 package selectItems
 
-import()
+import ()
 
 func GetTypWordsSQL() string {
-	SQL := 
-   `SELECT  words.word,
+	SQL :=
+		`SELECT  words.word,
 			words.description,
 			pos.parts_of_speech
 	FROM words
@@ -22,8 +22,8 @@ func GetTypWordsSQL() string {
 }
 
 func GetWordTypeIdSQL() string {
-	SQL := 
-   `SELECT word_type_id
+	SQL :=
+		`SELECT word_type_id
 	FROM word_types
 	WHERE word_type = '%s'`
 
