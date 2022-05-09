@@ -1,8 +1,6 @@
 package def
 
-import (
-
-)
+import ()
 
 type word struct {
 	Word            string `json:"word"`
@@ -19,9 +17,9 @@ type partsOfSpeech struct {
 }
 
 const (
-    INT_CONST_VAL = 100
-    STR_CONST_VAL = "Hello World as Constant"
+	INT_CONST_VAL = 100
+	STR_CONST_VAL = "Hello World as Constant"
 
-    private_int_const_val    = 5
-    private_string_const_val = "wow"
+	private_int_const_val    = 5
+	private_string_const_val = "wow"
 )

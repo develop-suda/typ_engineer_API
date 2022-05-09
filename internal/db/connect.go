@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/joho/godotenv"
 	"database/sql"
+	"github.com/joho/godotenv"
 )
 
 func DbConnect() *sql.DB {

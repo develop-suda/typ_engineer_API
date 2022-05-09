@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	// "github.com/develop-suda/typ_engineer_API/common"
 	"fmt"
-	"log"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"log"
 )
 
 type word struct {
@@ -46,44 +46,44 @@ func GetTypWords(db *sql.DB, values map[string]string) []word {
 	result, err := db.Query(sql)
 
 	for result.Next() {
-        wordTypeId := wordTypeId{}
-        if err := result.Scan(&wordTypeId.Word_type_id); err != nil {
-            log.Fatal(err)
-        }
-        onlyWordTypeId = append(onlyWordTypeId,wordTypeId)
-    }
+		wordTypeId := wordTypeId{}
+		if err := result.Scan(&wordTypeId.Word_type_id); err != nil {
+			log.Fatal(err)
+		}
+		onlyWordTypeId = append(onlyWordTypeId, wordTypeId)
+	}
 
 	if err != nil {
-        log.Fatal(err)
-    }
+		log.Fatal(err)
+	}
 
 	sql = GetTypWordsSQL()
 
 	// for key, value := range values {
 	// 	if key == "quantity" {
-    // 		sql += fmt.Sprintf(" LIMIT '%s'", value)
+	// 		sql += fmt.Sprintf(" LIMIT '%s'", value)
 	// 	} else {
 	// 		sql += fmt.Sprintf(" AND %s = '%s'", key, value)
 	// 	}
 	// }
 
 	sql = fmt.Sprintf(sql,
-					   values["type"],
-					   values["parts_of_speech"],
-					   values["alphabet"],
-					   values["quantity"])
+		values["type"],
+		values["parts_of_speech"],
+		values["alphabet"],
+		values["quantity"])
 
 	fmt.Println(sql)
 
 	result, err = db.Query(sql)
 
 	for result.Next() {
-        word := word{}
-        if err := result.Scan(&word.Word,&word.Parts_of_speech,&word.Description); err != nil {
-            log.Fatal(err)
-        }
-        words = append(words,word)
-    }
+		word := word{}
+		if err := result.Scan(&word.Word, &word.Parts_of_speech, &word.Description); err != nil {
+			log.Fatal(err)
+		}
+		words = append(words, word)
+	}
 
 	return words
 }
@@ -97,16 +97,16 @@ func GetTypes(db *sql.DB) []wordType {
 	result, err := db.Query(sql)
 
 	for result.Next() {
-        wordType := wordType{}
-        if err := result.Scan(&wordType.Word_type); err != nil {
-            log.Fatal(err)
-        }
-        wordTypes = append(wordTypes,wordType)
-    }
-	
-    if err != nil {
-        log.Fatal(err)
-    }
+		wordType := wordType{}
+		if err := result.Scan(&wordType.Word_type); err != nil {
+			log.Fatal(err)
+		}
+		wordTypes = append(wordTypes, wordType)
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// fmt.Println(wordTypes)
 	// fmt.Printf("%T\n", wordTypes)
@@ -122,16 +122,16 @@ func GetPartsOfSpeeches(db *sql.DB) []partsOfSpeech {
 	result, err := db.Query(sql)
 
 	for result.Next() {
-        partsOfSpeech := partsOfSpeech{}
-        if err := result.Scan(&partsOfSpeech.Parts_of_speech); err != nil {
-            log.Fatal(err)
-        }
-        partsOfSpeeches = append(partsOfSpeeches,partsOfSpeech)
-    }
-	
+		partsOfSpeech := partsOfSpeech{}
+		if err := result.Scan(&partsOfSpeech.Parts_of_speech); err != nil {
+			log.Fatal(err)
+		}
+		partsOfSpeeches = append(partsOfSpeeches, partsOfSpeech)
+	}
+
 	if err != nil {
-        log.Fatal(err)
-    }
+		log.Fatal(err)
+	}
 
 	return partsOfSpeeches
 }

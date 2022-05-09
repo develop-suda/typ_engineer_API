@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
 	// userRegist "github.com/develop-suda/typ_engineer_API/api/insert"
 	selectItems "github.com/develop-suda/typ_engineer_API/api/select"
@@ -17,10 +17,10 @@ func TypWordSelectHandler(w http.ResponseWriter, r *http.Request) {
 	// fmt.Print(test)
 
 	values := map[string]string{
-		"type":    			r.FormValue("type"),
-		"parts_of_speech":	r.FormValue("parts_of_speech"),
-		"alphabet": 		r.FormValue("alphabet"),
-		"quantity": 		r.FormValue("quantity"),
+		"type":            r.FormValue("type"),
+		"parts_of_speech": r.FormValue("parts_of_speech"),
+		"alphabet":        r.FormValue("alphabet"),
+		"quantity":        r.FormValue("quantity"),
 	}
 
 	db := connect.DbConnect()
