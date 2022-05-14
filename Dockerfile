@@ -6,6 +6,7 @@ ENV GOPATH=/go
 ENV GOBIN=$GOPATH/bin
 ENV PATH $PATH:$GOROOT:$GOPATH:$GOBIN
 ENV GO111MODULE=on
+ENV TZ=Asia/Tokyo
 
 # コンテナ内に作業ディレクトリを作成
 RUN mkdir /go/src/typ_engineer_api
