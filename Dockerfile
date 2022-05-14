@@ -8,11 +8,11 @@ ENV PATH $PATH:$GOROOT:$GOPATH:$GOBIN
 ENV GO111MODULE=on
 
 # コンテナ内に作業ディレクトリを作成
-RUN mkdir /go/src/typ_engineer
+RUN mkdir /go/src/typ_engineer_api
 # コンテナログイン時のディレクトリ指定
-WORKDIR /go/src/typ_engineer
+WORKDIR /go/src/typ_engineer_api
 # ホストのファイルをコンテナの作業ディレクトリに移行
-ADD . /go/src/typ_engineer
+ADD . /go/src/typ_engineer_api
 
 RUN apt-get update
 RUN go get github.com/uudashr/gopkgs/v2/cmd/gopkgs

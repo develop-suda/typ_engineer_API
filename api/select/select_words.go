@@ -2,7 +2,7 @@ package selectItems
 
 import (
 	"database/sql"
-	// "github.com/develop-suda/typ_engineer_API/common"
+	"github.com/develop-suda/typ_engineer_API/common"
 	"fmt"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"log"
@@ -38,9 +38,7 @@ func GetTypWords(db *sql.DB, values map[string]string) []word {
 	var words []word
 	var onlyWordTypeId []wordTypeId
 
-	// test := def.INT_CONST_VAL
-
-	sql := GetWordTypeIdSQL()
+	sql := def.GET_WORD_TYPE_ID_SQL
 	sql = fmt.Sprintf(sql, values["type"])
 
 	result, err := db.Query(sql)
@@ -57,7 +55,7 @@ func GetTypWords(db *sql.DB, values map[string]string) []word {
 		log.Fatal(err)
 	}
 
-	sql = GetTypWordsSQL()
+	sql = def.GET_TYP_WORDS_SQL
 
 	// for key, value := range values {
 	// 	if key == "quantity" {
@@ -72,8 +70,6 @@ func GetTypWords(db *sql.DB, values map[string]string) []word {
 		values["parts_of_speech"],
 		values["alphabet"],
 		values["quantity"])
-
-	fmt.Println(sql)
 
 	result, err = db.Query(sql)
 
