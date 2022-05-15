@@ -31,3 +31,4 @@ RUN GOBIN=/tmp/ go get github.com/go-delve/delve/cmd/dlv@master
 RUN go get -u github.com/jinzhu/gorm
 RUN go get -u github.com/go-sql-driver/mysql
 RUN go get -u github.com/joho/godotenv
+RUN go get -u github.com/golang-module/carbon/v2

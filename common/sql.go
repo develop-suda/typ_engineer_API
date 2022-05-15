@@ -3,7 +3,7 @@ package def
 import ()
 
 const (
-	 GET_TYP_WORDS_SQL =
+	GET_TYP_WORDS_SQL = 
 	`SELECT  words.word,
 			 words.description,
 			 pos.parts_of_speech
@@ -17,8 +17,8 @@ const (
 	AND LEFT(words.word, 1) = '%s'
 	ORDER BY RAND() LIMIT %s`
 
-	GET_WORD_TYPE_ID_SQL =
-	`SELECT word_type_id
+	GET_WORD_TYPE_ID_SQL = 
+   `SELECT word_type_id
 	FROM word_types
 	WHERE word_type = '%s'`
 )

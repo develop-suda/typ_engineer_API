@@ -2,9 +2,12 @@ package selectItems
 
 import (
 	"database/sql"
-	"github.com/develop-suda/typ_engineer_API/common"
 	"fmt"
+	"github.com/go-sql-driver/mysql"
 	"log"
+
+	def "github.com/develop-suda/typ_engineer_API/common"
+	logs "github.com/develop-suda/typ_engineer_API/internal/log"
 )
 
 type user struct {
@@ -14,6 +17,7 @@ type user struct {
 }
 
 func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
+	logs.WriteLog("GetTypWords開始", def.NORMAL)
 
 	// 複数件取得する場合、構造体を配列にする
 	var words []def.Word
@@ -44,6 +48,12 @@ func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
 		values["quantity"])
 
 	result, err = db.Query(sql)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message, def.ERROR)
+		}
+		log.Fatal(err)
+	}
 
 	for result.Next() {
 		word := def.Word{}
@@ -53,10 +63,12 @@ func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
 		words = append(words, word)
 	}
 
+	logs.WriteLog("GetTypWords正常終了", def.NORMAL)
 	return words
 }
 
 func GetTypes(db *sql.DB) []def.WordType {
+	logs.WriteLog("GetTypes開始", def.NORMAL)
 
 	// 複数件取得する場合、構造体を配列にする
 	var wordTypes []def.WordType
@@ -80,6 +92,7 @@ func GetTypes(db *sql.DB) []def.WordType {
 }
 
 func GetPartsOfSpeeches(db *sql.DB) []def.PartsOfSpeech {
+	logs.WriteLog("GetPartsOfSpeeches開始", def.NORMAL)
 
 	// 複数件取得する場合、構造体を配列にする
 	var partsOfSpeeches []def.PartsOfSpeech
@@ -99,5 +112,6 @@ func GetPartsOfSpeeches(db *sql.DB) []def.PartsOfSpeech {
 		log.Fatal(err)
 	}
 
+	logs.WriteLog("GetPartsOfSpeeches正常終了", def.NORMAL)
 	return partsOfSpeeches
 }
