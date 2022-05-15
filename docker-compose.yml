@@ -7,7 +7,7 @@ services:
     ports:
       - '8888:8888' # "ホストのポート:コンテナのポート"
     volumes:
-      - .:/go/src/typ_engineer # マウントディレクトリ指定
+      - .:/go/src/typ_engineer_api # マウントディレクトリ指定
     networks:
       - default
   mysql:

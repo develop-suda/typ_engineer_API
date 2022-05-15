@@ -7,4 +7,9 @@
 #vscode
 .vscode
 
+# DBの値はgitに入れない
 mysql/db/
+
+# エラーログはgitに入れない
+internal/log/error-logs/
+internal/log/normal-logs/
