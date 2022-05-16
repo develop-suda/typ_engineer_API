@@ -14,18 +14,19 @@ import (
 
 func WriteLog(message interface{}, logType string) {
 
-	month := strconv.Itoa(carbon.Now().Month())
-	day := strconv.Itoa(carbon.Now().Day())
+	year,month,day := carbon.Now().Date()
+	monthStr := strconv.Itoa(month)
+	dayStr := strconv.Itoa(day)
 
 	// 月、日が一桁の場合最初の0が付かないため、一桁の場合は0を付ける
-	if utf8.RuneCountInString(month) == 1 {
-		month = "0" + month
+	if utf8.RuneCountInString(monthStr) == 1 {
+		monthStr = "0" + monthStr
 	}
-	if utf8.RuneCountInString(day) == 1 {
-		day = "0" + day
+	if utf8.RuneCountInString(dayStr) == 1 {
+		dayStr = "0" + dayStr
 	}
 
-	today := strconv.Itoa(carbon.Now().Year()) + month + day
+	today := strconv.Itoa(year) + monthStr + dayStr
 	WriteLogPath := settingLogPath(logType)
 
 	loggingSettings(today+".log", logType)
