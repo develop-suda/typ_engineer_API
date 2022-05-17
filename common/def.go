@@ -8,4 +8,6 @@ const (
 
 	ERROR  = "error"
 	NORMAL = "normal"
+
+	ALL = "すべて"
 )

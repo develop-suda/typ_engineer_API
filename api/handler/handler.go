@@ -17,10 +17,10 @@ func TypWordSelectHandler(w http.ResponseWriter, r *http.Request) {
 	// fmt.Print(test)
 
 	values := map[string]string{
-		"type":            r.FormValue("type"),
-		"parts_of_speech": r.FormValue("parts_of_speech"),
-		"alphabet":        r.FormValue("alphabet"),
-		"quantity":        r.FormValue("quantity"),
+		"1type":            r.FormValue("type"),
+		"2parts_of_speech": r.FormValue("parts_of_speech"),
+		"3alphabet":        r.FormValue("alphabet"),
+		"4quantity":        r.FormValue("quantity"),
 	}
 
 	db := connect.DbConnect()
