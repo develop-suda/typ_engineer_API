@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"log"
+	"sort"
 
 	def "github.com/develop-suda/typ_engineer_API/common"
 	logs "github.com/develop-suda/typ_engineer_API/internal/log"
@@ -19,38 +20,31 @@ type user struct {
 func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
 	logs.WriteLog("GetTypWords開始", def.NORMAL)
 
-	// 複数件取得する場合、構造体を配列にする
-	var words []def.Word
-	var onlyWordTypeId []def.WordTypeId
+	var words []def.Word // 複数件取得する場合、構造体を配列にする
+	var keys []string // 引数のキーを格納する配列
 
-	sql := def.GET_WORD_TYPE_ID_SQL
-	sql = fmt.Sprintf(sql, values["type"])
+	// 引数のキーを配列に格納
+    for key := range values {
+        keys = append(keys, key)
+    }
+    // キーをソートする
+    sort.Strings(keys)
+
+	sql := def.GET_TYP_WORDS_SQL
+
+	// 引数の値に合わせてSQLを変更
+	// すべての場合は条件を追加する
+    for _, key := range keys {
+		if key == "1type" && values[key] != def.ALL { sql += " AND types.word_type = '" + values[key] + "'" }
+		if key == "2parts_of_speech" && values[key] != def.ALL { sql += " AND pos.parts_of_speech = '" + values[key] + "'" }
+		if key == "3alphabet" && values[key] != def.ALL { sql += " AND LEFT(words.word, 1) = '" + values[key] + "'" }
+		if key == "4quantity" { sql += " ORDER BY RAND() LIMIT " + values[key] }
+    }
 
 	result, err := db.Query(sql)
-
-	for result.Next() {
-		wordTypeId := def.WordTypeId{}
-		if err := result.Scan(&wordTypeId.Word_type_id); err != nil {
-			log.Fatal(err)
-		}
-		onlyWordTypeId = append(onlyWordTypeId, wordTypeId)
-	}
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	sql = def.GET_TYP_WORDS_SQL
-	sql = fmt.Sprintf(sql,
-		values["type"],
-		values["parts_of_speech"],
-		values["alphabet"],
-		values["quantity"])
-
-	result, err = db.Query(sql)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message, def.ERROR)
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+ "\n" +sql, def.ERROR)
 		}
 		log.Fatal(err)
 	}
@@ -73,11 +67,18 @@ func GetTypes(db *sql.DB) []def.WordType {
 	// 複数件取得する場合、構造体を配列にする
 	var wordTypes []def.WordType
 
-	addAll := def.WordType{Word_type: "すべて"}
+	addAll := def.WordType{Word_type: def.ALL}
     wordTypes = append(wordTypes, addAll)
 
 	sql := "SELECT word_type FROM word_types ORDER BY word_type ASC"
 	result, err := db.Query(sql)
+
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+ "\n" +sql, def.ERROR)
+		}
+		log.Fatal(err)
+	}
 
 	for result.Next() {
 		wordType := def.WordType{}
@@ -91,6 +92,7 @@ func GetTypes(db *sql.DB) []def.WordType {
 		log.Fatal(err)
 	}
 
+	logs.WriteLog("GetTypes正常終了", def.NORMAL)
 	return wordTypes
 }
 
@@ -100,11 +102,18 @@ func GetPartsOfSpeeches(db *sql.DB) []def.PartsOfSpeech {
 	// 複数件取得する場合、構造体を配列にする
 	var partsOfSpeeches []def.PartsOfSpeech
 
-	addAll := def.PartsOfSpeech{Parts_of_speech: "すべて"}
+	addAll := def.PartsOfSpeech{Parts_of_speech: def.ALL}
 	partsOfSpeeches = append(partsOfSpeeches, addAll)
 
 	sql := "SELECT parts_of_speech FROM parts_of_speeches ORDER BY parts_of_speech ASC"
 	result, err := db.Query(sql)
+
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+ "\n" +sql, def.ERROR)
+		}
+		log.Fatal(err)
+	}
 
 	for result.Next() {
 		partsOfSpeech := def.PartsOfSpeech{}
