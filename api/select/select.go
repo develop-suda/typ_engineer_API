@@ -100,6 +100,9 @@ func GetPartsOfSpeeches(db *sql.DB) []def.PartsOfSpeech {
 	// 複数件取得する場合、構造体を配列にする
 	var partsOfSpeeches []def.PartsOfSpeech
 
+	addAll := def.PartsOfSpeech{Parts_of_speech: "すべて"}
+	partsOfSpeeches = append(partsOfSpeeches, addAll)
+
 	sql := "SELECT parts_of_speech FROM parts_of_speeches ORDER BY parts_of_speech ASC"
 	result, err := db.Query(sql)
 
