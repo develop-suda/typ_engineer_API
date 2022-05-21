@@ -10,6 +10,6 @@ func Router() {
 	http.HandleFunc("/api/typWord", handler.TypWordSelectHandler)
 	http.HandleFunc("/api/types", handler.GetTypeHandler)
 	http.HandleFunc("/api/partsofspeech", handler.GetPartsOfSpeechHandler)
-	// http.HandleFunc("/api/userRegist", handler.UserRegistHandler)
+	http.HandleFunc("/api/userRegister", handler.UserRegisterHandler)
 	http.ListenAndServe(":8888", nil)
 }
