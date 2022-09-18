@@ -19,4 +19,9 @@ type (
 	WordTypeId struct {
 		Word_type_id string
 	}
+
+	LoginData struct {
+		User_id string `json:"user_id"`
+		TokenString string `json:"tokenString"`
+	}
 )

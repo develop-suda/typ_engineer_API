@@ -22,7 +22,20 @@ func CreateUser(db *sql.DB, values map[string]string) {
 		values["password"],
 	)
 
-	_, err := db.Query(sql)
+	//トランザクション開始
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	//SQL実行
+	_, err = tx.Exec(sql)
+	//トランザクション終了時にRollbackする場合はこちらを使用
+	// defer tx.Rollback()
+	//トランザクション終了時にCommitする場合はこちらを使用
+	defer tx.Commit()
+	
+	// _, err := db.Query(sql)
 
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {

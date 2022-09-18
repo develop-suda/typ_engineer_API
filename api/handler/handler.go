@@ -7,6 +7,8 @@ import (
 	insert "github.com/develop-suda/typ_engineer_API/api/insert"
 	selectItems "github.com/develop-suda/typ_engineer_API/api/select"
 	connect "github.com/develop-suda/typ_engineer_API/internal/db"
+	token "github.com/develop-suda/typ_engineer_API/api/login"
+
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
@@ -85,9 +87,52 @@ func UserRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	db := connect.DbConnect()
 	insert.CreateUser(db, values)
+	userId := selectItems.MatchUserPassword(db, values)
 	defer db.Close()
+
+	loginData := token.CreateToken(userId)
+
+	//loginDataをjsonに変換
+	json, err := json.Marshal(loginData)
+	if err != nil {
+		return
+	}
 
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
+
+	w.Write(json)
+
+}
+
+func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
+
+	values := map[string]string{
+		"email":    r.FormValue("email"),
+		"password": r.FormValue("password"),
+	}
+
+	db := connect.DbConnect()
+	userId := selectItems.MatchUserPassword(db, values)
+	defer db.Close()
+
+	// ユーザIDを取得できた場合jwtトークンを発行
+	if userId != "" {
+
+	    loginData := token.CreateToken(userId)
+
+		//loginDataをjsonに変換
+		json, err := json.Marshal(loginData)
+		if err != nil {
+			return
+		}
+		w.Write(json)
+
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
+
 }

@@ -11,12 +11,6 @@ import (
 	logs "github.com/develop-suda/typ_engineer_API/internal/log"
 )
 
-type user struct {
-	Name         string
-	Email        string
-	Phone_number string
-}
-
 func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
 	logs.WriteLog("GetTypWords開始", def.NORMAL)
 
@@ -43,6 +37,7 @@ func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
 
 	result, err := db.Query(sql)
 	if err != nil {
+		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
 		}
@@ -51,6 +46,7 @@ func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
 
 	for result.Next() {
 		word := def.Word{}
+		// TODO 調べる
 		if err := result.Scan(&word.Word, &word.Parts_of_speech, &word.Description); err != nil {
 			log.Fatal(err)
 		}
@@ -111,6 +107,7 @@ func GetPartsOfSpeeches(db *sql.DB) []def.PartsOfSpeech {
 
 	for result.Next() {
 		partsOfSpeech := def.PartsOfSpeech{}
+		// Scanは読み取りね
 		if err := result.Scan(&partsOfSpeech.Parts_of_speech); err != nil {
 			log.Fatal(err)
 		}
@@ -123,4 +120,30 @@ func GetPartsOfSpeeches(db *sql.DB) []def.PartsOfSpeech {
 
 	logs.WriteLog("GetPartsOfSpeeches正常終了", def.NORMAL)
 	return partsOfSpeeches
+}
+
+func MatchUserPassword(db *sql.DB, values map[string]string) string {
+	logs.WriteLog("MatchUserPassword開始", def.NORMAL)
+
+	var user_id string
+
+	sql := "SELECT user_id FROM users WHERE email = "
+	sql += "'" + values["email"] + "'"
+	sql += " AND password = "
+	sql += "'" + values["password"] + "'"
+
+	result, err := db.Query(sql)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+		}
+		log.Fatal(err)
+	}
+
+	for result.Next() {
+		result.Scan(&user_id)
+	}
+
+	logs.WriteLog("MatchUserPassword正常終了", def.NORMAL)
+	return user_id
 }
