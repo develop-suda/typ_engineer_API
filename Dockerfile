@@ -32,3 +32,10 @@ RUN go get -u github.com/jinzhu/gorm
 RUN go get -u github.com/go-sql-driver/mysql
 RUN go get -u github.com/joho/godotenv
 RUN go get -u github.com/golang-module/carbon/v2
+
+RUN go mod tidy
+# Airをインストール
+RUN go install github.com/cosmtrek/air@v1.27.3
+
+# airコマンドでGoファイルを起動
+CMD ["air"]
