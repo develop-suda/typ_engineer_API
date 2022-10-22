@@ -9,5 +9,5 @@ const (
 	ERROR  = "error"
 	NORMAL = "normal"
 
-	ALL = "ALL"
+	TYPE_ALL = "ALL"
 )

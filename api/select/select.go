@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"log"
-	"sort"
+	// "sort"
 
 	def "github.com/develop-suda/typ_engineer_API/common"
 	logs "github.com/develop-suda/typ_engineer_API/internal/log"
 )
 
+// SQLは定数のままで、valuesの値の変換だけを行う
 func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
 	logs.WriteLog("GetTypWords開始", def.NORMAL)
 
@@ -21,21 +22,16 @@ func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
 	for key := range values {
 		keys = append(keys, key)
 	}
-	// キーをソートする
-	sort.Strings(keys)
 
 	sql := def.GET_TYP_WORDS_SQL
 
-	// 引数の値に合わせてSQLを変更
-	// すべての場合は条件を追加する
 	for _, key := range keys {
-		if key == "1type" && values[key] != def.ALL { sql += " AND types.word_type = '" + values[key] + "'" }
-		if key == "2parts_of_speech" && values[key] != def.ALL { sql += " AND pos.parts_of_speech = '" + values[key] + "'" }
-		if key == "3alphabet" && values[key] != def.ALL { sql += " AND LEFT(words.word, 1) = '" + values[key] + "'" }
-		if key == "4quantity" { sql += " ORDER BY RAND() LIMIT " + values[key] }
-    }
+		if key == "type" && values[key] == def.TYPE_ALL { values[key] = "types.word_type"}
+		if key == "parts_of_speech" && values[key] == def.TYPE_ALL { values[key] = "pos.parts_of_speech"}
+		if key == "alphabet" && values[key] == def.TYPE_ALL { values[key] = "LEFT(words.word, 1)"}
+	}
 
-	result, err := db.Query(sql)
+	result, err := db.Query(sql, values["type"], values["parts_of_speech"], values["alphabet"], values["quantity"])
 	if err != nil {
 		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
@@ -126,14 +122,46 @@ func MatchUserPassword(db *sql.DB, values map[string]string) string {
 	logs.WriteLog("MatchUserPassword開始", def.NORMAL)
 
 	var user_id string
+	var err error
 
-	sql := "SELECT user_id FROM users WHERE email = "
-	sql += "'" + values["email"] + "'"
-	sql += " AND password = "
-	sql += "'" + values["password"] + "'"
+	sql := "SELECT LPAD(user_id,8,0) FROM users WHERE email = ? AND password = ?"
 
-	result, err := db.Query(sql)
+	result := db.QueryRow(sql, values["email"], values["password"])
+	if err = result.Err(); err != nil {
+		fmt.Println(err)
+	}
+	
+	err = result.Scan(&user_id)
 	if err != nil {
+		log.Fatal(err)
+	}
+
+
+	logs.WriteLog("MatchUserPassword正常終了", def.NORMAL)
+	return user_id
+}
+
+func ReturngetTypWordsSQL(db *sql.DB, values map[string]string) string {
+
+	var words []def.Word // 複数件取得する場合、構造体を配列にする
+	var keys []string    // 引数のキーを格納する配列
+
+	// 引数のキーを配列に格納
+	for key := range values {
+		keys = append(keys, key)
+	}
+
+	sql := def.GET_TYP_WORDS_SQL
+
+	for _, key := range keys {
+		if key == "type" && values[key] == def.TYPE_ALL { values[key] = "types.word_type"}
+		if key == "parts_of_speech" && values[key] == def.TYPE_ALL { values[key] = "pos.parts_of_speech"}
+		if key == "alphabet" && values[key] == def.TYPE_ALL { values[key] = "LEFT(words.word, 1)"}
+	}
+
+	result, err := db.Query(sql, values["type"], values["parts_of_speech"], values["alphabet"], values["quantity"])
+	if err != nil {
+		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
 		}
@@ -141,9 +169,13 @@ func MatchUserPassword(db *sql.DB, values map[string]string) string {
 	}
 
 	for result.Next() {
-		result.Scan(&user_id)
+		word := def.Word{}
+		// TODO 調べる
+		if err := result.Scan(&word.Word, &word.Parts_of_speech, &word.Description); err != nil {
+			log.Fatal(err)
+		}
+		words = append(words, word)
 	}
 
-	logs.WriteLog("MatchUserPassword正常終了", def.NORMAL)
-	return user_id
+	return sql
 }

@@ -38,4 +38,4 @@ RUN go mod tidy
 RUN go install github.com/cosmtrek/air@v1.27.3
 
 # airコマンドでGoファイルを起動
-CMD ["air"]
+# CMD ["air"]
