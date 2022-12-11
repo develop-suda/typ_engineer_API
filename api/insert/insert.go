@@ -1,15 +1,15 @@
-package insert
+package def
 
 import (
-	"database/sql"
-	"fmt"
-	"log"
 	"strconv"
+	"log"
+	"fmt"
+	"database/sql"
 
 	"github.com/go-sql-driver/mysql"
 
-	def "github.com/develop-suda/typ_engineer_API/common"
 	logs "github.com/develop-suda/typ_engineer_API/internal/log"
+	def "github.com/develop-suda/typ_engineer_API/common"
 )
 
 type tempStructWord struct {
@@ -17,26 +17,26 @@ type tempStructWord struct {
 }
 
 // ユーザ情報を登録する関数
-func CreateUser(values map[string]string) {
-	// logs.WriteLog("CreateUser開始", def.NORMAL)
-    // sql := def.INSERT_USER_SQL
+func CreateUser(db *sql.DB, values map[string]string) {
+	logs.WriteLog("CreateUser開始", def.NORMAL)
+    sql := def.INSERT_USER_SQL
 
-	// //SQL実行
-	// _, err := s.Tx.DB.Exec(sql, values["first_name"], values["last_name"], values["email"], values["password"])
+	//SQL実行
+	_, err := db.Query(sql, values["first_name"], values["last_name"], values["email"], values["password"])
 	
-	// if err != nil {
-	// 	if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-	// 		logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
-	// 	}
-	// 	log.Fatal(err)
-	// }
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+		}
+		log.Fatal(err)
+	}
 
-	// logs.WriteLog("CreateUser正常終了", def.NORMAL)
-	// return
+	logs.WriteLog("CreateUser正常終了", def.NORMAL)
+	return
 }
 
 // wordのタイピング情報の更新先を登録する関数
-func InsertTypWordInformation(tx *sql.DB, userId string) {
+func InsertTypWordInformation(db *sql.DB, userId string) {
 	logs.WriteLog("InsertTypeWordInfo開始",def.NORMAL)
 
 	var words []tempStructWord
@@ -44,7 +44,7 @@ func InsertTypWordInformation(tx *sql.DB, userId string) {
 	sql := def.GET_WORD_UNIQUE_SQL
 
 	// 重複しない全単語を取得
-	selectWords, err := tx.Query(sql)
+	selectWords, err := db.Query(sql)
 	if err != nil {
 		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
@@ -73,11 +73,12 @@ func InsertTypWordInformation(tx *sql.DB, userId string) {
 	sql = sql[:len(sql)-1]
 
 	// wordのタイピング情報の更新先を登録する
-	result, err := tx.Exec(sql)
+	result, err := db.Exec(sql)
 	if err != nil {
 		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+			log.Println(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql)
 		}
 		log.Fatal(err)
 	}

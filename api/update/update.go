@@ -8,8 +8,8 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 
-	def "github.com/develop-suda/typ_engineer_API/common"
 	logs "github.com/develop-suda/typ_engineer_API/internal/log"
+	def "github.com/develop-suda/typ_engineer_API/common"
 )
 
 // wordのタイピング情報を更新する関数

@@ -2,7 +2,12 @@ package def
 
 import (
 	"database/sql"
+	"fmt"
 )
+
+func structfunc() {
+	fmt.Println("structfunc")
+}
 
 type (
 	Word struct {

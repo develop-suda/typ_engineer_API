@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/go-sql-driver/mysql"
 	"log"
-	// "sort"
 
 	def "github.com/develop-suda/typ_engineer_API/common"
 	logs "github.com/develop-suda/typ_engineer_API/internal/log"
 )
+
 
 // SQLは定数のままで、valuesの値の変換だけを行う
 func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
