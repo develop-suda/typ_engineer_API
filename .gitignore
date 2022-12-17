@@ -13,3 +13,5 @@ mysql/db/
 # エラーログはgitに入れない
 internal/log/error-logs/
 internal/log/normal-logs/
+
+ToDo.txt

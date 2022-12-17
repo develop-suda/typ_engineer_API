@@ -6,6 +6,7 @@ import (
 
 	"database/sql"
 	"github.com/joho/godotenv"
+	"github.com/go-sql-driver/mysql"
 )
 
 func DbConnect() *sql.DB {
@@ -23,14 +24,17 @@ func DbConnect() *sql.DB {
 
 	// db variable.
 	dbDriver := "mysql"
-	USER := os.Getenv("MYSQL_USER")
-	PASS := os.Getenv("MYSQL_PASSWORD")
-	PROTOCOL := "tcp(mysql_container:3306)"
-	DBNAME := os.Getenv("MYSQL_DATABASE")
 
-	CONNECT := USER + ":" + PASS + "@" + PROTOCOL + "/" + DBNAME
+	CONNECT := mysql.Config{
+		User:                 os.Getenv("MYSQL_USER"),
+		Passwd:               os.Getenv("MYSQL_PASSWORD"),
+		Net:                  "tcp",
+		Addr:                 "mysql_container:3306",
+		DBName:               os.Getenv("MYSQL_DATABASE"),
+		AllowNativePasswords: true,
+	}
 
-	db, err := sql.Open(dbDriver, CONNECT)
+	db, err := sql.Open(dbDriver, CONNECT.FormatDSN())
 
 	if err != nil {
 		panic(err.Error())

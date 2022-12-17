@@ -1,6 +1,13 @@
 package def
 
-import ()
+import (
+	"database/sql"
+	"fmt"
+)
+
+func structfunc() {
+	fmt.Println("structfunc")
+}
 
 type (
 	Word struct {
@@ -16,7 +23,32 @@ type (
 		Parts_of_speech string `json:"parts_of_speech"`
 	}
 
-	WordTypeId struct {
-		Word_type_id string
+	LoginData struct {
+		User_id string `json:"user_id"`
+		TokenString string `json:"tokenString"`
+	}
+
+	TypWordInfo struct {
+		Word string
+		SuccessTypCount int
+		MissTypCount int
+	}
+
+	TypAlphabetInfo struct {
+		Alphabet string
+		SuccessTypCount int
+		MissTypCount int	
+	}
+
+	typinfo struct {
+		SuccessTypCount int
+		MissTypCount int
+	}
+	TxAdmin struct {
+		*sql.DB
+	}
+
+	Service struct {
+		Tx TxAdmin
 	}
 )
