@@ -191,7 +191,7 @@ func UpdateTypeInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// jsonを構造体に変換
-	err = json.Unmarshal([]byte(values["typAlohabetInfo"]), &typAlphaInfo)
+	err = json.Unmarshal([]byte(values["typAlphabetInfo"]), &typAlphaInfo)
 	if err != nil {
 		fmt.Println(err)
 	}
