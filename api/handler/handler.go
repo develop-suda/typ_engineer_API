@@ -169,7 +169,7 @@ func UserLogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func PostTypeWordInfoHandler(w http.ResponseWriter, r *http.Request) {
+func UpdateTypeInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -178,19 +178,29 @@ func PostTypeWordInfoHandler(w http.ResponseWriter, r *http.Request) {
 	values := map[string]string{
 		 "userId":             r.FormValue("userId"),
 		 "typWordInfo":        r.FormValue("typWordInfo"),
+		 "typAlphabetInfo":    r.FormValue("typAlphaInfo"),
 	}
 
 	var typWordInfo []def.TypWordInfo
+	var typAlphaInfo []def.TypAlphabetInfo	
 
-	// sql := def.UPDATE_TYP_WORD_INFO_SQL
+	// jsonを構造体に変換
+ 	err := json.Unmarshal([]byte(values["typWordInfo"]), &typWordInfo)
+	if err != nil {
+		fmt.Println(err)
+	}
 
-	// userId := values["userId"]
-	temp := values["typWordInfo"]
- 	json.Unmarshal([]byte(temp), &typWordInfo)
+	// jsonを構造体に変換
+	err = json.Unmarshal([]byte(values["typAlohabetInfo"]), &typAlphaInfo)
+	if err != nil {
+		fmt.Println(err)
+	}
 
+	// ToDo トランザクションにする
+	// 入力した単語情報とアルファベット情報をDBに登録
 	db := connect.DbConnect()
 	update.UpdateTypWordInfo(db, values)
-	// update.UpdateTypAlphabetInfo(db, values)
+	update.UpdateTypAlphabetInfo(db, values)
 	defer db.Close()
 
 }

@@ -37,9 +37,13 @@ type (
 	TypAlphabetInfo struct {
 		Alphabet string
 		SuccessTypCount int
+		MissTypCount int	
+	}
+
+	typinfo struct {
+		SuccessTypCount int
 		MissTypCount int
 	}
-	
 	TxAdmin struct {
 		*sql.DB
 	}
