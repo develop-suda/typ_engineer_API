@@ -23,7 +23,7 @@ func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
 		keys = append(keys, key)
 	}
 
-	sql := def.GET_TYP_WORDS_SQL
+	sql := def.GetTypWordsSQL()
 
 	for _, key := range keys {
 		if key == "type" && values[key] == def.TYPE_ALL { values[key] = "types.word_type"}
@@ -151,7 +151,7 @@ func ReturngetTypWordsSQL(db *sql.DB, values map[string]string) string {
 		keys = append(keys, key)
 	}
 
-	sql := def.GET_TYP_WORDS_SQL
+	sql := def.GetTypWordsSQL()
 
 	for _, key := range keys {
 		if key == "type" && values[key] == def.TYPE_ALL { values[key] = "types.word_type"}

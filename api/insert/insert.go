@@ -19,7 +19,7 @@ type tempStructWord struct {
 // ユーザ情報を登録する関数
 func CreateUser(db *sql.DB, values map[string]string) {
 	logs.WriteLog("CreateUser開始", def.NORMAL)
-    sql := def.INSERT_USER_SQL
+    sql := def.GetInsertUserSQL()
 
 	//SQL実行
 	_, err := db.Query(sql, values["first_name"], values["last_name"], values["email"], values["password"])
@@ -41,7 +41,7 @@ func InsertTypWordInformation(db *sql.DB, userId string) {
 
 	var words []tempStructWord
 
-	sql := def.GET_WORD_UNIQUE_SQL
+	sql := def.GetWordUniqueSQL()
 
 	// 重複しない全単語を取得
 	selectWords, err := db.Query(sql)

@@ -7,14 +7,14 @@ import ()
 
 const (
 
-	// GET_SELECT_WORD_SQL : タイピングする単語情報を取得するSQL
-	GET_TYP_WORDS_SQL = `SELECT  words.word,
+	// SELECT_SELECT_WORD_SQL : タイピングする単語情報を取得するSQL
+	SELECT_TYP_WORDS_SQL = `SELECT  words.word,
 			 words.description,
 			 pos.parts_of_speech
-	FROM words
-	INNER JOIN parts_of_speeches pos
+	FROM v_words
+	INNER JOIN v_parts_of_speeches pos
 	ON pos.parts_of_speech_id = words.parts_of_speech_id
-	INNER JOIN word_types types
+	INNER JOIN v_word_types types
 	ON types.word_type_id = words.word_type_id
 	WHERE types.word_type = ?
 	AND pos.parts_of_speech = ?
@@ -22,10 +22,19 @@ const (
 	ORDER BY RAND()
 	LIMIT ?`
 
-	// GET_WORD_UNIQUE_SQL : 一意になるよう単語を取得するSQL
-	GET_WORD_UNIQUE_SQL = `
+	// SELECT_WORD_UNIQUE_SQL : 一意になるよう単語を取得するSQL
+	SELECT_WORD_UNIQUE_SQL = `
 	SELECT word
 	FROM v_words
 	GROUP BY word`
 	
 )
+
+func GetTypWordsSQL() string {
+	return SELECT_TYP_WORDS_SQL
+}
+
+func GetWordUniqueSQL() string {
+	return SELECT_WORD_UNIQUE_SQL
+}
+

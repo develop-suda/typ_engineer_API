@@ -43,3 +43,17 @@ const (
 	AND alphabet = ?
 	AND is_deleted = false`
 )
+
+// ログイン情報を更新するSQLを返す関数
+func GetUpdateLogoutDataSQL() string {
+	return UPDATE_LOGOUT_DATA_SQL
+}
+// 単語のタイピング情報を更新するSQLを返す関数
+func GetUpdateTypWordInfoSQL() string {
+	return UPDATE_TYP_WORD_INFO_SQL
+}
+
+// アルファベットのタイピング情報を更新するSQLを返す関数
+func GetUpdateTypAlphabetInfoSQL() string {
+	return UPDATE_TYP_ALPHABET_INFO_SQL
+}

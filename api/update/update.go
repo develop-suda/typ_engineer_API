@@ -17,7 +17,7 @@ func UpdateTypWordInfo(db *sql.DB, values map[string]string) {
 	logs.WriteLog("UpdateTypWordInfo開始", def.NORMAL)
 	var typWordInfos []def.TypWordInfo
 
-	sql := GetUpdateTypWordInfoSQL()
+	sql := def.GetUpdateTypWordInfoSQL()
 
 	userId := values["userId"]
 	temp := values["typWordInfo"]
@@ -42,7 +42,7 @@ func UpdateTypWordInfo(db *sql.DB, values map[string]string) {
 func UpdateTypAlphabetInfo(db *sql.DB, values map[string]string) {
 	logs.WriteLog("UpdateTyoAlphabetInfo開始", def.NORMAL)
 	var typAlphabetInfos []def.TypAlphabetInfo
-	sql := GetUpdateTypAlphabetInfoSQL()
+	sql := def.GetUpdateTypAlphabetInfoSQL()
 
 	userId := values["userId"]
 	temp := values["typAlphabetInfo"]
@@ -66,18 +66,4 @@ func UpdateTypAlphabetInfo(db *sql.DB, values map[string]string) {
 
 	logs.WriteLog("UpdateTyoAlphabetInfo正常終了", def.NORMAL)
 	return
-}
-
-// ログイン情報を更新するSQLを返す関数
-func GetUpdateLogoutDataSQL() string {
-	return def.UPDATE_LOGOUT_DATA_SQL
-}
-// 単語のタイピング情報を更新するSQLを返す関数
-func GetUpdateTypWordInfoSQL() string {
-	return def.UPDATE_TYP_WORD_INFO_SQL
-}
-
-// アルファベットのタイピング情報を更新するSQLを返す関数
-func GetUpdateTypAlphabetInfoSQL() string {
-	return def.UPDATE_TYP_ALPHABET_INFO_SQL
 }
