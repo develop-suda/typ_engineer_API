@@ -248,3 +248,39 @@ func GetWordTypInfoHandler(w http.ResponseWriter, r *http.Request){
 
 	w.Write(json)
 }
+
+func GetMyPageDataHandler(w http.ResponseWriter, r *http.Request) {
+
+	userId := r.FormValue("userId")
+	var myPageData def.MyPageData
+
+	db := connect.DbConnect()
+	defer db.Close()
+
+	//DBからユーザ情報を取得
+	// 単語の入力成功、失敗回数を取得
+	myPageData.WordTypInfoSum = selectItems.GetWordTypInfoSum(db, userId)
+
+	// アルファベットの入力成功、失敗回数を取得
+	myPageData.AlphabetTypInfoSum = selectItems.GetAlphabetTypInfoSum(db, userId)
+
+	// 単語の入力成功、失敗回数のランキングを取得
+	myPageData.WordCountRanking = selectItems.GetWordCountRanking(db, userId)
+	myPageData.WordMissCountRanking = selectItems.GetWordMissCountRanking(db, userId)
+
+	// アルファベットの入力成功、失敗回数のランキングを取得
+	myPageData.AlphabetCountRanking = selectItems.GetAlphabetCountRanking(db, userId)
+	myPageData.AlphabetMissCountRanking = selectItems.GetAlphabetMissCountRanking(db, userId)
+
+	//DBの取得結果をjsonに変換
+	json, err := json.Marshal(myPageData)
+	if err != nil {
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+
+	w.Write(json)
+
+}

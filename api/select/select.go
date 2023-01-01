@@ -245,3 +245,158 @@ func GetWordTypInfo(db *sql.DB, userId string) []def.TypCount {
 	logs.WriteLog("GetWordTypsInfo正常終了", def.NORMAL)
 	return typWordInfos
 }
+
+func GetWordTypInfoSum(db *sql.DB, userId string) def.WordTypInfoSum {
+	
+	logs.WriteLog("GetWordTypInfoSum開始", def.NORMAL)
+
+	var wordTypInfoSum def.WordTypInfoSum
+
+	sql := def.GetWordTypInfoSumSQL()
+
+	result := db.QueryRow(sql,userId)
+	fmt.Println(result)
+	fmt.Println(sql)
+	fmt.Println(userId)
+
+	if err := result.Scan(&wordTypInfoSum.Typing_count, &wordTypInfoSum.Typing_miss_count); err != nil {
+		log.Fatal(err)
+	}
+
+	logs.WriteLog("GetWordTypInfoSum正常終了", def.NORMAL)
+	return wordTypInfoSum
+
+}
+
+func GetAlphabetTypInfoSum(db *sql.DB, userId string) def.AlphabetTypInfoSum {
+	
+	logs.WriteLog("GetAlphabetTypInfoSum開始", def.NORMAL)
+
+	var alphabetTypInfoSum def.AlphabetTypInfoSum
+
+	sql := def.GetAlphabetTypInfoSumSQL()
+
+	result := db.QueryRow(sql,userId)
+	if err := result.Scan(&alphabetTypInfoSum.Typing_count, &alphabetTypInfoSum.Typing_miss_count); err != nil {
+		log.Fatal(err)
+	}
+
+	logs.WriteLog("GetAlphabetTypInfoSum正常終了", def.NORMAL)
+	return alphabetTypInfoSum
+}
+
+func GetWordCountRanking(db *sql.DB,userId string) []def.WordCountRanking {
+	
+	logs.WriteLog("GetWordCountRanking開始", def.NORMAL)
+
+	// 複数件取得する場合、構造体を配列にする
+	var wordCountRankings []def.WordCountRanking
+
+	sql := def.GetWordCountRankingSQL()
+
+	result, err := db.Query(sql,userId)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+		}
+		log.Fatal(err)
+	}
+
+	for result.Next() {
+		wordCountRanking := def.WordCountRanking{}
+		if err := result.Scan(&wordCountRanking.Word, &wordCountRanking.Typing_count, &wordCountRanking.Rank_result); err != nil {
+			log.Fatal(err)
+		}
+		wordCountRankings = append(wordCountRankings, wordCountRanking)
+	}
+
+	logs.WriteLog("GetWordCountRanking正常終了", def.NORMAL)
+	return wordCountRankings
+}
+
+func GetWordMissCountRanking(db *sql.DB,userId string) []def.WordMissCountRanking {
+	
+	logs.WriteLog("GetWordMissRanking開始", def.NORMAL)
+
+	// 複数件取得する場合、構造体を配列にする
+	var wordMissRankings []def.WordMissCountRanking
+
+	sql := def.GetWordMissRankingSQL()
+
+	result, err := db.Query(sql,userId)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+		}
+		log.Fatal(err)
+	}
+
+	for result.Next() {
+		wordMissRanking := def.WordMissCountRanking{}
+		if err := result.Scan(&wordMissRanking.Word, &wordMissRanking.Typing_miss_count, &wordMissRanking.Rank_result); err != nil {
+			log.Fatal(err)
+		}
+		wordMissRankings = append(wordMissRankings, wordMissRanking)
+	}
+
+	logs.WriteLog("GetWordMissRanking正常終了", def.NORMAL)
+	return wordMissRankings
+}
+
+func GetAlphabetCountRanking(db *sql.DB,userId string) []def.AlphabetCountRanking {
+	
+	logs.WriteLog("GetAlphabetCountRanking開始", def.NORMAL)
+
+	// 複数件取得する場合、構造体を配列にする
+	var alphabetCountRankings []def.AlphabetCountRanking
+
+	sql := def.GetAlphabetCountRankingSQL()
+
+	result, err := db.Query(sql,userId)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+		}
+		log.Fatal(err)
+	}
+
+	for result.Next() {
+		alphabetCountRanking := def.AlphabetCountRanking{}
+		if err := result.Scan(&alphabetCountRanking.Alphabet, &alphabetCountRanking.Typing_count, &alphabetCountRanking.Rank_result); err != nil {
+			log.Fatal(err)
+		}
+		alphabetCountRankings = append(alphabetCountRankings, alphabetCountRanking)
+	}
+
+	logs.WriteLog("GetAlphabetCountRanking正常終了", def.NORMAL)
+	return alphabetCountRankings
+}
+
+func GetAlphabetMissCountRanking(db *sql.DB,userId string) []def.AlphabetMissCountRanking {
+	
+	logs.WriteLog("GetAlphabetMissCountRanking開始", def.NORMAL)
+
+	// 複数件取得する場合、構造体を配列にする
+	var alphabetMissCountRankings []def.AlphabetMissCountRanking
+
+	sql := def.GetAlphabetMissRankingSQL()
+
+	result, err := db.Query(sql,userId)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+		}
+		log.Fatal(err)
+	}
+
+	for result.Next() {
+		alphabetMissCountRanking := def.AlphabetMissCountRanking{}
+		if err := result.Scan(&alphabetMissCountRanking.Alphabet, &alphabetMissCountRanking.Typing_miss_count, &alphabetMissCountRanking.Rank_result); err != nil {
+			log.Fatal(err)
+		}
+		alphabetMissCountRankings = append(alphabetMissCountRankings, alphabetMissCountRanking)
+	}
+
+	logs.WriteLog("GetAlphabetMissCountRanking正常終了", def.NORMAL)
+	return alphabetMissCountRankings
+}

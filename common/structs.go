@@ -51,4 +51,47 @@ type (
 		MissTypCount int `json:"missTypCount"`
 	}
 
+	MyPageData struct {
+		WordTypInfoSum WordTypInfoSum `json:"wordTypInfoSum"`
+		AlphabetTypInfoSum AlphabetTypInfoSum `json:"alphabetTypInfoSum"`
+		WordCountRanking []WordCountRanking `json:"wordCountRanking"`
+		WordMissCountRanking []WordMissCountRanking `json:"wordMissCountRanking"`
+		AlphabetCountRanking []AlphabetCountRanking `json:"alphabetCountRanking"`
+		AlphabetMissCountRanking []AlphabetMissCountRanking `json:"alphabetMissCountRanking"`
+	}
+
+	WordTypInfoSum struct {
+		Typing_count int
+		Typing_miss_count int
+	}
+
+	AlphabetTypInfoSum struct {
+		Typing_count int
+		Typing_miss_count int
+	}
+
+	WordCountRanking struct {
+		Word string 
+		Typing_count int
+		Rank_result int
+	}
+
+	WordMissCountRanking struct {
+		Word string
+		Typing_miss_count int
+		Rank_result int
+	}
+
+	AlphabetCountRanking struct {
+		Alphabet string
+		Typing_count int
+		Rank_result int
+	}
+
+	AlphabetMissCountRanking struct {
+		Alphabet string
+		Typing_miss_count int
+		Rank_result int
+	}
+
 )
