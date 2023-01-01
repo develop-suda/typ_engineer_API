@@ -26,12 +26,20 @@ func GetTypWords(db *sql.DB, values map[string]string) []def.Word {
 	sql := def.GetTypWordsSQL()
 
 	for _, key := range keys {
-		if key == "type" && values[key] == def.TYPE_ALL { values[key] = "types.word_type"}
-		if key == "parts_of_speech" && values[key] == def.TYPE_ALL { values[key] = "pos.parts_of_speech"}
-		if key == "alphabet" && values[key] == def.TYPE_ALL { values[key] = "LEFT(words.word, 1)"}
+		if key == "type" && values[key] != def.TYPE_ALL { 
+			sql += " AND types.word_type = '" + values[key] + "'"
+		}
+		if key == "parts_of_speech" && values[key] != def.TYPE_ALL {
+			sql += " AND pos.parts_of_speech = '" + values[key] + "'"
+		}
+		if key == "alphabet" && values[key] != def.TYPE_ALL { 
+			sql += " AND LEFT(words.word, 1) = '" + values[key] + "'"
+		}
 	}
 
-	result, err := db.Query(sql, values["type"], values["parts_of_speech"], values["alphabet"], values["quantity"])
+	sql += " ORDER BY RAND() LIMIT " + values["quantity"]
+
+	result, err := db.Query(sql)
 	if err != nil {
 		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
@@ -178,4 +186,62 @@ func ReturngetTypWordsSQL(db *sql.DB, values map[string]string) string {
 	}
 
 	return sql
+}
+
+func GetWordDetail(db *sql.DB) []def.WordDetail {
+	
+	logs.WriteLog("GetWordDetail開始", def.NORMAL)
+
+	// 複数件取得する場合、構造体を配列にする
+	var wordDetails []def.WordDetail
+
+	sql := def.GetWordDetailSQL()
+
+	result, err := db.Query(sql)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+		}
+		log.Fatal(err)
+	}
+
+	for result.Next() {
+		wordDetail := def.WordDetail{}
+		if err := result.Scan(&wordDetail.Word, &wordDetail.Description, &wordDetail.Parts_of_speech, &wordDetail.Word_type); err != nil {
+			log.Fatal(err)
+		}
+		wordDetails = append(wordDetails, wordDetail)
+	}
+
+	logs.WriteLog("GetWordDetail正常終了", def.NORMAL)
+	return wordDetails
+}
+
+func GetWordTypInfo(db *sql.DB, userId string) []def.TypCount {
+	
+	logs.WriteLog("GetWordTypInfo開始", def.NORMAL)
+
+	// 複数件取得する場合、構造体を配列にする
+	var typWordInfos []def.TypCount
+
+	sql := def.GetWordTypInfoSQL()
+
+	result, err := db.Query(sql,userId)
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+		}
+		log.Fatal(err)
+	}
+
+	for result.Next() {
+		typWordInfo := def.TypCount{}
+		if err := result.Scan(&typWordInfo.SuccessTypCount, &typWordInfo.MissTypCount); err != nil {
+			log.Fatal(err)
+		}
+		typWordInfos = append(typWordInfos, typWordInfo)
+	}
+	
+	logs.WriteLog("GetWordTypsInfo正常終了", def.NORMAL)
+	return typWordInfos
 }

@@ -9,7 +9,7 @@ import ()
 
 const (
 
-	// SELECT_SELECT_WORD_SQL : タイピングする単語情報を取得するSQL
+	// SELECT_TYP_WORD_SQL : タイピングする単語情報を取得するSQL
 	SELECT_TYP_WORDS_SQL = `SELECT  words.word,
 			 words.description,
 			 pos.parts_of_speech
@@ -18,11 +18,7 @@ const (
 	ON pos.parts_of_speech_id = words.parts_of_speech_id
 	INNER JOIN v_word_types types
 	ON types.word_type_id = words.word_type_id
-	WHERE types.word_type = ?
-	AND pos.parts_of_speech = ?
-	AND LEFT(words.word, 1) = ?
-	ORDER BY RAND()
-	LIMIT ?`
+	WHERE 1 = 1`
 
 	// SELECT_WORD_UNIQUE_SQL : 一意になるよう単語を取得するSQL
 	SELECT_WORD_UNIQUE_SQL = `
@@ -46,7 +42,6 @@ const (
 	// SELECT_WORD_TYP_INFO_SQL : 単語のタイピング情報を取得するSQL
 	SELECT_WORD_TYP_INFO_SQL =`
 	SELECT
-    	word,
     	typing_count,
     	typing_miss_count
 	FROM v_typing_word_informations
