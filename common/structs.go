@@ -1,7 +1,6 @@
 package def
 
 import (
-	"database/sql"
 	"fmt"
 )
 
@@ -37,18 +36,19 @@ type (
 	TypAlphabetInfo struct {
 		Alphabet string
 		SuccessTypCount int
-		MissTypCount int	
-	}
-
-	typinfo struct {
-		SuccessTypCount int
 		MissTypCount int
 	}
-	TxAdmin struct {
-		*sql.DB
+
+	 WordDetail struct {
+		Word string `json:"word"`
+		Description string `json:"description"`
+		Parts_of_speech string `json:"parts_of_speech"`
+		Word_type string `json:"word_type"`
 	}
 
-	Service struct {
-		Tx TxAdmin
+	TypCount struct {
+		SuccessTypCount int `json:"successTypCount"`
+		MissTypCount int `json:"missTypCount"`
 	}
+
 )

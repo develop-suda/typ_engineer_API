@@ -2,16 +2,16 @@ package handler
 
 import (
 	"encoding/json"
-	"net/http"
 	"fmt"
+	"net/http"
 
 	insert "github.com/develop-suda/typ_engineer_API/api/insert"
-	selectItems "github.com/develop-suda/typ_engineer_API/api/select"
-	update "github.com/develop-suda/typ_engineer_API/api/update"
-	connect "github.com/develop-suda/typ_engineer_API/internal/db"
 	login "github.com/develop-suda/typ_engineer_API/api/login"
 	logout "github.com/develop-suda/typ_engineer_API/api/logout"
+	selectItems "github.com/develop-suda/typ_engineer_API/api/select"
+	update "github.com/develop-suda/typ_engineer_API/api/update"
 	def "github.com/develop-suda/typ_engineer_API/common"
+	connect "github.com/develop-suda/typ_engineer_API/internal/db"
 )
 
 func TypWordSelectHandler(w http.ResponseWriter, r *http.Request) {
@@ -203,4 +203,48 @@ func UpdateTypeInfoHandler(w http.ResponseWriter, r *http.Request) {
 	update.UpdateTypAlphabetInfo(db, values)
 	defer db.Close()
 
+}
+
+
+func GetWordDetailHandler(w http.ResponseWriter, r *http.Request) {
+	
+	db := connect.DbConnect()
+	defer db.Close()
+	
+	//DBから単語情報を取得
+	wordDetail := selectItems.GetWordDetail(db)
+
+	//DBの取得結果をjsonに変換
+	json, err := json.Marshal(wordDetail)
+	if err != nil {
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+
+	w.Write(json)
+
+}
+
+func GetWordTypInfoHandler(w http.ResponseWriter, r *http.Request){
+
+	userId := r.FormValue("userId")
+
+	db := connect.DbConnect()
+	defer db.Close()
+
+	//DBから単語入力情報を取得
+	typWordInfo := selectItems.GetWordTypInfo(db, userId)
+
+	//DBの取得結果をjsonに変換
+	json, err := json.Marshal(typWordInfo)
+	if err != nil {
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+
+	w.Write(json)
 }
