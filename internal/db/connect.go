@@ -5,8 +5,11 @@ import (
 	"os"
 
 	"database/sql"
-	"github.com/joho/godotenv"
+
+	logs "github.com/develop-suda/typ_engineer_API/internal/log"
+	def "github.com/develop-suda/typ_engineer_API/common"
 	"github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 func DbConnect() *sql.DB {
@@ -37,7 +40,8 @@ func DbConnect() *sql.DB {
 	db, err := sql.Open(dbDriver, CONNECT.FormatDSN())
 
 	if err != nil {
-		panic(err.Error())
+		logs.WriteLog(err.Error(), def.ERROR)
+		return nil
 	}
 
 	return db

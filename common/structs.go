@@ -27,18 +27,6 @@ type (
 		TokenString string `json:"tokenString"`
 	}
 
-	TypWordInfo struct {
-		Word string
-		SuccessTypCount int
-		MissTypCount int
-	}
-
-	TypAlphabetInfo struct {
-		Alphabet string
-		SuccessTypCount int
-		MissTypCount int
-	}
-
 	 WordDetail struct {
 		Word string `json:"word"`
 		Description string `json:"description"`
@@ -61,37 +49,77 @@ type (
 	}
 
 	WordTypInfoSum struct {
-		Typing_count int
-		Typing_miss_count int
+		Typing_count int `json:"typingCount"`
+		Typing_miss_count int `json:"typingMissCount"`
 	}
 
 	AlphabetTypInfoSum struct {
-		Typing_count int
-		Typing_miss_count int
+		Typing_count int `json:"typingCount"`
+		Typing_miss_count int `json:"typingMissCount"`
 	}
 
 	WordCountRanking struct {
-		Word string 
-		Typing_count int
-		Rank_result int
+		Word string `json:"word"`
+		Typing_count int `json:"typingCount"`
+		Rank_result int `json:"rankResult"`
 	}
 
 	WordMissCountRanking struct {
-		Word string
-		Typing_miss_count int
-		Rank_result int
+		Word string `json:"word"`
+		Typing_miss_count int `json:"typingMissCount"`
+		Rank_result int `json:"rankResult"`
 	}
 
 	AlphabetCountRanking struct {
-		Alphabet string
-		Typing_count int
-		Rank_result int
+		Alphabet string `json:"alphabet"`
+		Typing_count int `json:"typingCount"`
+		Rank_result int `json:"rankResult"`
 	}
 
 	AlphabetMissCountRanking struct {
+		Alphabet string `json:"alphabet"`
+		Typing_miss_count int `json:"typingMissCount"`
+		Rank_result int `json:"rankResult"`
+	}
+
+)
+
+// リクエストバラメータを受け取るための構造体
+type(
+
+	TypWordSelect struct {
+		Word_type string
+		Parts_of_speech string
 		Alphabet string
-		Typing_miss_count int
-		Rank_result int
+		Quantity int
+	}
+
+	UserRegisterInfo struct {
+		Last_name string
+		First_name string
+		Email string
+		Password string
+	}
+
+	UserMatchInfo struct {
+		Email string
+		Password string
+	}
+
+	UserIdStruct struct {
+		User_id string
+	}
+
+	TypWordInfo struct {
+		Word string
+		SuccessTypCount int
+		MissTypCount int
+	}
+
+	TypAlphabetInfo struct {
+		Alphabet string
+		SuccessTypCount int
+		MissTypCount int
 	}
 
 )

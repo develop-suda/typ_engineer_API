@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	insert "github.com/develop-suda/typ_engineer_API/api/insert"
 	login "github.com/develop-suda/typ_engineer_API/api/login"
@@ -12,20 +13,32 @@ import (
 	update "github.com/develop-suda/typ_engineer_API/api/update"
 	def "github.com/develop-suda/typ_engineer_API/common"
 	connect "github.com/develop-suda/typ_engineer_API/internal/db"
+	logs "github.com/develop-suda/typ_engineer_API/internal/log"
 )
 
 func TypWordSelectHandler(w http.ResponseWriter, r *http.Request) {
 
-	values := map[string]string{
-		"type":            r.FormValue("type"),
-		"parts_of_speech": r.FormValue("parts_of_speech"),
-		"alphabet":        r.FormValue("alphabet"),
-		"quantity":        r.FormValue("quantity"),
+	var result []def.Word
+
+	// HTTPリクエストパラメータは文字型で取得されるため、数値型に変換する
+	intQuantity, err := strconv.Atoi(r.FormValue("quantity"))
+	if err != nil {
+		logs.WriteLog(err.Error(), def.ERROR)
+		return
+	}
+
+	values := def.TypWordSelect{
+		Word_type:       r.FormValue("type"),
+		Parts_of_speech: r.FormValue("parts_of_speech"),
+		Alphabet:        r.FormValue("alphabet"),
+		Quantity:        intQuantity,
 	}
 
 	db := connect.DbConnect()
-	result := selectItems.GetTypWords(db, values)
 	defer db.Close()
+	if result = selectItems.GetTypWords(db, values); &result == nil {
+		return
+	}
 
 	json, err := json.Marshal(result)
 	if err != nil {
@@ -40,9 +53,13 @@ func TypWordSelectHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetTypeHandler(w http.ResponseWriter, r *http.Request) {
 
+	var result []def.WordType
+
 	db := connect.DbConnect()
-	result := selectItems.GetTypes(db)
 	defer db.Close()
+	if result = selectItems.GetTypes(db); result == nil {
+		return
+	}
 
 	//DBの取得結果をjsonに変換
 	json, err := json.Marshal(result)
@@ -58,9 +75,13 @@ func GetTypeHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetPartsOfSpeechHandler(w http.ResponseWriter, r *http.Request) {
 
+	var result []def.PartsOfSpeech
+
 	db := connect.DbConnect()
-	result := selectItems.GetPartsOfSpeeches(db)
 	defer db.Close()
+	if result = selectItems.GetPartsOfSpeeches(db); result == nil {
+		return
+	}
 
 	//DBの取得結果をjsonに変換
 	json, err := json.Marshal(result)
@@ -76,29 +97,39 @@ func GetPartsOfSpeechHandler(w http.ResponseWriter, r *http.Request) {
 
 func UserRegisterHandler(w http.ResponseWriter, r *http.Request) {
 
-	values := map[string]string{
-		"last_name":  r.FormValue("last_name"),
-		"first_name": r.FormValue("first_name"),
-		"email":      r.FormValue("email"),
-		"password":   r.FormValue("password"),
-	}
-
-
 	var err error
+	var userId string
+	var loginData def.LoginData
 
-	//トランザクションはする
-	db := connect.DbConnect()
-	if err != nil {
-		fmt.Println(err)
+	// HTTPリクエストパラメータを取得
+	values := def.UserRegisterInfo{
+		Last_name:  r.FormValue("last_name"),
+		First_name: r.FormValue("first_name"),
+		Email:      r.FormValue("email"),
+		Password:   r.FormValue("password"),
 	}
 
-	insert.CreateUser(db, values)
-	userId := selectItems.MatchUserPassword(db, values)
-	insert.InsertTypWordInformation(db, userId)
-	insert.InsertTypAlphabetInformation(db, userId)
-	login.InsertLoginData(db, userId)
+	// パスワードが一致か確認するために取得
+	userMatcInfo := def.UserMatchInfo{
+		Email:    values.Email,
+		Password: values.Password,
+	}
 
-	loginData := login.CreateToken(userId)
+	// TODO トランザクションはする
+	// TODO connect.DbConnect()の帰り値がnilの場合の処理を追加する 全部の処理に追加する
+	db := connect.DbConnect()
+	defer db.Close()
+	if db == nil {
+		fmt.Println(err)
+		return
+	}
+
+	if err = insert.CreateUser(db, values); err != nil { return }
+	if userId = selectItems.MatchUserPassword(db, userMatcInfo); userId == "" { return }
+	if err = insert.InsertTypWordInformation(db, userId); err != nil { return }
+	if err = insert.InsertTypAlphabetInformation(db, userId); err != nil { return }
+	if err = login.InsertLoginData(db, userId); err != nil { return }
+	if loginData = login.CreateToken(userId); &loginData == nil { return }
 
 	// loginDataをjsonに変換
 	json, err := json.Marshal(loginData)
@@ -120,38 +151,48 @@ func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
 
-	values := map[string]string{
-		"email":    r.FormValue("email"),
-		"password": r.FormValue("password"),
+	var userId string
+	var loginData def.LoginData
+
+	values := def.UserMatchInfo{
+		Email:    r.FormValue("email"),
+		Password: r.FormValue("password"),
 	}
 
 	db := connect.DbConnect()
+	defer db.Close()
 
 	tx, err := db.Begin()
+	// deferが二つあった場合下の方から実行される
+	defer db.Close()
+	defer tx.Commit()
 	if err != nil {
 		panic(err)
 	}
 
-	userId := selectItems.MatchUserPassword(db, values)
-	login.InsertLoginData(db, userId)
-	tx.Commit()
+	// ユーザIDとパスワードが一致するか確認
+	// 一致した場合はユーザIDを取得
+	if userId = selectItems.MatchUserPassword(db, values); userId == "" {
+		return
+	}
 
-	defer db.Close()
+	// ユーザIDを取得できた場合ログインデータをDBにインサート
+	if err = login.InsertLoginData(db, userId); err != nil{
+		return
+	}
 
 	// ユーザIDを取得できた場合jwtトークンを発行
-	if userId != "" {
-
-	    loginData := login.CreateToken(userId)
-
-		//loginDataをjsonに変換
-		json, err := json.Marshal(loginData)
-		if err != nil {
-			return
-		}
-
-		w.Write(json)
-
+	if loginData = login.CreateToken(userId); &loginData == nil {
+		return
 	}
+
+	//loginDataをjsonに変換
+	json, err := json.Marshal(loginData)
+	if err != nil {
+		return
+	}
+
+	w.Write(json)
 
 }
 
@@ -161,11 +202,13 @@ func UserLogoutHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
 
-	userId := r.FormValue("userId")
+	userId := def.UserIdStruct{User_id: r.FormValue("userId")}
 
 	db := connect.DbConnect()
-	logout.UpdateLogoutData(db, userId)
 	defer db.Close()
+	if err := logout.UpdateLogoutData(db, userId); err != nil {
+		return
+	}
 
 }
 
@@ -175,47 +218,53 @@ func UpdateTypeInfoHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
 
+	var typWordInfos []def.TypWordInfo
+	var typAlphaInfos []def.TypAlphabetInfo	
+
 	values := map[string]string{
-		 "userId":             r.FormValue("userId"),
 		 "typWordInfo":        r.FormValue("typWordInfo"),
 		 "typAlphabetInfo":    r.FormValue("typAlphaInfo"),
 	}
 
-	var typWordInfo []def.TypWordInfo
-	var typAlphaInfo []def.TypAlphabetInfo	
+	userId := def.UserIdStruct{User_id: r.FormValue("userId")}
 
-	// jsonを構造体に変換
- 	err := json.Unmarshal([]byte(values["typWordInfo"]), &typWordInfo)
+	// jsonを構造体に変換できるかどうか確認
+ 	err := json.Unmarshal([]byte(values["typWordInfo"]), &typWordInfos)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
-	// jsonを構造体に変換
-	err = json.Unmarshal([]byte(values["typAlphabetInfo"]), &typAlphaInfo)
+	// jsonを構造体に変換できるかどうか確認
+	err = json.Unmarshal([]byte(values["typAlphabetInfo"]), &typAlphaInfos)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	// ToDo トランザクションにする
 	// 入力した単語情報とアルファベット情報をDBに登録
 	db := connect.DbConnect()
-	update.UpdateTypWordInfo(db, values)
-	update.UpdateTypAlphabetInfo(db, values)
-	defer db.Close()
+	defer db.Close()		
+	if err = update.UpdateTypWordInfo(db, typWordInfos, userId); err != nil { return }
+	if err = update.UpdateTypAlphabetInfo(db, typAlphaInfos, userId); err != nil { return }
 
 }
 
-
 func GetWordDetailHandler(w http.ResponseWriter, r *http.Request) {
+
+	var wordDetails []def.WordDetail
 	
 	db := connect.DbConnect()
 	defer db.Close()
 	
 	//DBから単語情報を取得
-	wordDetail := selectItems.GetWordDetail(db)
+	if wordDetails = selectItems.GetWordDetail(db); wordDetails== nil {
+		return
+	}
 
 	//DBの取得結果をjsonに変換
-	json, err := json.Marshal(wordDetail)
+	json, err := json.Marshal(wordDetails)
 	if err != nil {
 		return
 	}
@@ -227,18 +276,25 @@ func GetWordDetailHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// TODO 関数名もろもろ変
+// 関数名が下だけど
+// 別の構造体にTypWordInfoという名前が使われてるためTypCountに近しい関数名にしよう
 func GetWordTypInfoHandler(w http.ResponseWriter, r *http.Request){
 
-	userId := r.FormValue("userId")
+	var typWordInfos []def.TypCount
+
+	userId := def.UserIdStruct{User_id: r.FormValue("userId")}
 
 	db := connect.DbConnect()
 	defer db.Close()
 
 	//DBから単語入力情報を取得
-	typWordInfo := selectItems.GetWordTypInfo(db, userId)
+	if typWordInfos = selectItems.GetWordTypInfo(db, userId); typWordInfos == nil {
+		return
+	}
 
 	//DBの取得結果をjsonに変換
-	json, err := json.Marshal(typWordInfo)
+	json, err := json.Marshal(typWordInfos)
 	if err != nil {
 		return
 	}
@@ -251,7 +307,7 @@ func GetWordTypInfoHandler(w http.ResponseWriter, r *http.Request){
 
 func GetMyPageDataHandler(w http.ResponseWriter, r *http.Request) {
 
-	userId := r.FormValue("userId")
+	userId := def.UserIdStruct{User_id: r.FormValue("userId")}
 	var myPageData def.MyPageData
 
 	db := connect.DbConnect()
@@ -259,18 +315,18 @@ func GetMyPageDataHandler(w http.ResponseWriter, r *http.Request) {
 
 	//DBからユーザ情報を取得
 	// 単語の入力成功、失敗回数を取得
-	myPageData.WordTypInfoSum = selectItems.GetWordTypInfoSum(db, userId)
+	if myPageData.WordTypInfoSum = selectItems.GetWordTypInfoSum(db, userId); &myPageData.WordTypInfoSum == nil { return }
 
 	// アルファベットの入力成功、失敗回数を取得
-	myPageData.AlphabetTypInfoSum = selectItems.GetAlphabetTypInfoSum(db, userId)
+	if myPageData.AlphabetTypInfoSum = selectItems.GetAlphabetTypInfoSum(db, userId); &myPageData.AlphabetTypInfoSum == nil { return }
 
 	// 単語の入力成功、失敗回数のランキングを取得
-	myPageData.WordCountRanking = selectItems.GetWordCountRanking(db, userId)
-	myPageData.WordMissCountRanking = selectItems.GetWordMissCountRanking(db, userId)
+	if myPageData.WordCountRanking = selectItems.GetWordCountRanking(db, userId); &myPageData.WordCountRanking == nil { return }
+	if myPageData.WordMissCountRanking = selectItems.GetWordMissCountRanking(db, userId); &myPageData.WordMissCountRanking == nil { return }
 
 	// アルファベットの入力成功、失敗回数のランキングを取得
-	myPageData.AlphabetCountRanking = selectItems.GetAlphabetCountRanking(db, userId)
-	myPageData.AlphabetMissCountRanking = selectItems.GetAlphabetMissCountRanking(db, userId)
+	if myPageData.AlphabetCountRanking = selectItems.GetAlphabetCountRanking(db, userId); &myPageData.AlphabetCountRanking == nil { return }
+	if myPageData.AlphabetMissCountRanking = selectItems.GetAlphabetMissCountRanking(db, userId); &myPageData.AlphabetMissCountRanking == nil { return }
 
 	//DBの取得結果をjsonに変換
 	json, err := json.Marshal(myPageData)
