@@ -2,7 +2,6 @@ package def
 
 import (
 	"strconv"
-	"log"
 	"fmt"
 	"database/sql"
 
@@ -17,8 +16,8 @@ type tempStructWord struct {
 }
 
 // ユーザ情報を登録する関数
-func CreateUser(db *sql.DB, values def.UserRegisterInfo) error {
-	logs.WriteLog("CreateUser開始", def.NORMAL)
+func CreateUser(tx *sql.Tx, values def.UserRegisterInfo) error {
+	logs.WriteLog("CreateUser開始", nil, def.NORMAL)
 
 	var err error
 
@@ -26,40 +25,40 @@ func CreateUser(db *sql.DB, values def.UserRegisterInfo) error {
 
 	err = values.Validate()
 	if err != nil {
-		logs.WriteLog(err.Error(), def.ERROR)
+		logs.WriteLog(err.Error(), values, def.ERROR)
 		return err
 	}
 
 	//SQL実行
-	_, err = db.Query(sql, values.First_name, values.Last_name, values.Email, values.Password)
+	_, err = tx.Query(sql, values.First_name, values.Last_name, values.Email, values.Password)
 	
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, values, def.ERROR)
 		}
 		return err
 	}
 
-	logs.WriteLog("CreateUser正常終了", def.NORMAL)
+	logs.WriteLog("CreateUser正常終了", nil, def.NORMAL)
 	return nil
 }
 
 // wordのタイピング情報の更新先を登録する関数
-func InsertTypWordInformation(db *sql.DB, userId string) error {
-	logs.WriteLog("InsertTypeWordInfo開始",def.NORMAL)
+func InsertTypWordInformation(tx *sql.Tx, userId string) error {
+	logs.WriteLog("InsertTypeWordInfo開始", nil, def.NORMAL)
 
 	var words []tempStructWord
 
 	sql := def.GetWordUniqueSQL()
 
 	// 重複しない全単語を取得
-	selectWords, err := db.Query(sql)
+	selectWords, err := tx.Query(sql)
 	if err != nil {
 		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
 		}
-		log.Fatal(err)
+		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
 	}
 
@@ -68,7 +67,8 @@ func InsertTypWordInformation(db *sql.DB, userId string) error {
 		word := tempStructWord{}
 		// TODO 調べる
 		if err := selectWords.Scan(&word.Word); err != nil {
-			log.Fatal(err)
+			logs.WriteLog(err.Error(), 
+				tempStructWord{Word: word.Word},def.ERROR)
 			return err
 		}
 		words = append(words, word)
@@ -84,30 +84,29 @@ func InsertTypWordInformation(db *sql.DB, userId string) error {
 	sql = sql[:len(sql)-1]
 
 	// wordのタイピング情報の更新先を登録する
-	result, err := db.Exec(sql)
+	result, err := tx.Exec(sql)
 	if err != nil {
 		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
-			log.Println(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql)
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
 		}
-		log.Fatal(err)
+		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
 	}
 
 	// 登録先のテーブル、登録件数をログに出力
 	if rows,err := result.RowsAffected(); err == nil {
-		logs.WriteLog("テーブル名 : typing_word_informations ,インサート件数 : " + strconv.FormatInt(rows,10), def.NORMAL)
+		logs.WriteLog("テーブル名 : typing_word_informations ,インサート件数 : " + strconv.FormatInt(rows,10), sql, def.NORMAL)
 	}
 
 
-	logs.WriteLog("InsertTypWordInfo終了", def.NORMAL)
+	logs.WriteLog("InsertTypWordInfo終了", nil,def.NORMAL)
 	return nil
 }
 
 // アルファベットのタイピング情報の更新先を登録する関数
-func InsertTypAlphabetInformation(db *sql.DB, userId string) error {
-	logs.WriteLog("InsertTypAlphabetInfo開始",def.NORMAL)
+func InsertTypAlphabetInformation(tx *sql.Tx, userId string) error {
+	logs.WriteLog("InsertTypAlphabetInfo開始", nil, def.NORMAL)
 
 	sql := def.INSERT_TYPING_ALPHABET_INFORMATIONS_SQL
 
@@ -120,21 +119,21 @@ func InsertTypAlphabetInformation(db *sql.DB, userId string) error {
 	sql = sql[:len(sql)-1]
 
 	// アルファベットのタイピング情報の更新先を登録する
-	result, err := db.Exec(sql)
+	result, err := tx.Exec(sql)
 	if err != nil {
 		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
 		}
-		log.Fatal(err)
+		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
 	}
 
 	// 登録先のテーブル、登録件数をログに出力
 	if rows,err := result.RowsAffected(); err == nil {
-		logs.WriteLog("テーブル名 : typing_alphabet_informations ,インサート件数 : " + strconv.FormatInt(rows,10), def.NORMAL)
+		logs.WriteLog("テーブル名 : typing_alphabet_informations ,インサート件数 : " + strconv.FormatInt(rows,10), sql, def.NORMAL)
 	}
 
-	logs.WriteLog("InsertTypAlphabetInfo終了", def.NORMAL)
+	logs.WriteLog("InsertTypAlphabetInfo終了", nil, def.NORMAL)
 	return nil
 }

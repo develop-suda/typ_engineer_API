@@ -3,7 +3,6 @@ package update
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	"github.com/go-sql-driver/mysql"
 
@@ -13,7 +12,7 @@ import (
 
 // wordのタイピング情報を更新する関数
 func UpdateTypWordInfo(db *sql.DB, values []def.TypWordInfo, userId def.UserIdStruct) error {
-	logs.WriteLog("UpdateTypWordInfo開始", def.NORMAL)
+	logs.WriteLog("UpdateTypWordInfo開始", nil, def.NORMAL)
 
 	var typWordInfos []def.TypWordInfo
 	var err error
@@ -24,14 +23,20 @@ func UpdateTypWordInfo(db *sql.DB, values []def.TypWordInfo, userId def.UserIdSt
 	for _, typWordInfo := range typWordInfos {
 		err = typWordInfo.Validate()
 		if err != nil {
-			logs.WriteLog(err.Error(), def.ERROR)
+			logs.WriteLog(err.Error(), 
+				def.TypWordInfo{
+					Word: typWordInfo.Word,
+					SuccessTypCount: typWordInfo.SuccessTypCount,
+					MissTypCount: typWordInfo.MissTypCount,
+				},
+			def.ERROR)
 			return err
 		}
 	}
 
 	err = userId.Validate()
 	if err != nil {
-		logs.WriteLog(err.Error(), def.ERROR)
+		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
 	}
 
@@ -42,20 +47,26 @@ func UpdateTypWordInfo(db *sql.DB, values []def.TypWordInfo, userId def.UserIdSt
 		_, err := db.Exec(sql, typWordInfo.SuccessTypCount, typWordInfo.MissTypCount, userId.User_id, typWordInfo.Word)
 		if err != nil {
 			if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-				logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+				logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, 
+					def.TypWordInfo{
+						Word: typWordInfo.Word,
+						SuccessTypCount: typWordInfo.SuccessTypCount,
+						MissTypCount: typWordInfo.MissTypCount,
+					},
+				def.ERROR)
 			}
-			log.Fatal(err)
+			logs.WriteLog(err.Error(), sql, def.ERROR)
 			return err
 		}
 	}
 
-	logs.WriteLog("UpdateTypWordInfo正常終了", def.NORMAL)
+	logs.WriteLog("UpdateTypWordInfo正常終了", nil, def.NORMAL)
 	return nil
 }
 
 // アルファベットのタイピング情報を更新する関数
 func UpdateTypAlphabetInfo(db *sql.DB, typAlphabetInfos []def.TypAlphabetInfo, userId def.UserIdStruct) error {
-	logs.WriteLog("UpdateTyoAlphabetInfo開始", def.NORMAL)
+	logs.WriteLog("UpdateTyoAlphabetInfo開始", nil, def.NORMAL)
 	
 	var err error
 
@@ -63,14 +74,20 @@ func UpdateTypAlphabetInfo(db *sql.DB, typAlphabetInfos []def.TypAlphabetInfo, u
 	for _, typAlphabetInfo := range typAlphabetInfos {
 		err = typAlphabetInfo.Validate()
 		if err != nil {
-			logs.WriteLog(err.Error(), def.ERROR)
+			logs.WriteLog(err.Error(), 
+				def.TypAlphabetInfo{
+					Alphabet: typAlphabetInfo.Alphabet,
+					SuccessTypCount: typAlphabetInfo.SuccessTypCount,
+					MissTypCount: typAlphabetInfo.MissTypCount,
+				},
+			def.ERROR)
 			return err
 		}
 	}
 
 	err = userId.Validate()
 	if err != nil {
-		logs.WriteLog(err.Error(), def.ERROR)
+		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
 	}
 
@@ -85,14 +102,20 @@ func UpdateTypAlphabetInfo(db *sql.DB, typAlphabetInfos []def.TypAlphabetInfo, u
 		_, err := db.Exec(sql, typAlphabetInfo.SuccessTypCount, typAlphabetInfo.MissTypCount, userId.User_id, typAlphabetInfo.Alphabet)
 		if err != nil {
 			if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-				logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+				logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql,
+					def.TypAlphabetInfo{
+						Alphabet: typAlphabetInfo.Alphabet,
+						SuccessTypCount: typAlphabetInfo.SuccessTypCount,
+						MissTypCount: typAlphabetInfo.MissTypCount,
+					},
+				def.ERROR)
 			}
-			log.Fatal(err)
+			logs.WriteLog(err.Error, sql, def.ERROR)
 			return err
 		}
 	
 	}
 
-	logs.WriteLog("UpdateTyoAlphabetInfo正常終了", def.NORMAL)
+	logs.WriteLog("UpdateTyoAlphabetInfo正常終了", nil, def.NORMAL)
 	return nil
 }

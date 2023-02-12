@@ -1,7 +1,6 @@
 package logout
 
 import(
-	"log"
 	"fmt"
 	"database/sql"
 
@@ -12,11 +11,11 @@ import(
 )
 
 func UpdateLogoutData(db *sql.DB, userId def.UserIdStruct) error {
-	logs.WriteLog("UpdateLogoutData開始", def.NORMAL)
+	logs.WriteLog("UpdateLogoutData開始", nil, def.NORMAL)
 
 	err := userId.Validate()
 	if err != nil {
-		log.Fatal(err)
+		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
 	}
 
@@ -26,7 +25,8 @@ func UpdateLogoutData(db *sql.DB, userId def.UserIdStruct) error {
 	tx, err := db.Begin()
 	defer tx.Commit()
 	if err != nil {
-		log.Fatal(err)
+		logs.WriteLog(err.Error(), userId, def.ERROR)
+		return err
 	}
 
 	//SQL実行
@@ -34,12 +34,12 @@ func UpdateLogoutData(db *sql.DB, userId def.UserIdStruct) error {
 	
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
 		}
-		log.Fatal(err)
+		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
 	}
 	
-	logs.WriteLog("UpdateLogoutData終了", def.NORMAL)
+	logs.WriteLog("UpdateLogoutData終了", nil, def.NORMAL)
 	return nil
 }

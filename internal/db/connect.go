@@ -40,7 +40,7 @@ func DbConnect() *sql.DB {
 	db, err := sql.Open(dbDriver, CONNECT.FormatDSN())
 
 	if err != nil {
-		logs.WriteLog(err.Error(), def.ERROR)
+		logs.WriteLog(err.Error(), "DB接続できませんでした", def.ERROR)
 		return nil
 	}
 

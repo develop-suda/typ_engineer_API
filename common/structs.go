@@ -1,12 +1,6 @@
 package def
 
-import (
-	"fmt"
-)
-
-func structfunc() {
-	fmt.Println("structfunc")
-}
+import ()
 
 type (
 	Word struct {
