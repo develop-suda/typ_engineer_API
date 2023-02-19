@@ -18,15 +18,18 @@ func GetTypWords(db *sql.DB, values def.TypWordSelect) ([]def.Word, error) {
 	var words []def.Word // 複数件取得する場合、構造体を配列にする
 	var err error
 
+	// バリデーションチェック
 	err = values.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), values, def.ERROR)
 		return words, err
 	}
 
+	// sqlを取得
 	sql := def.GetTypWordsSQL()
 
 
+	// valuesの値をSQLに反映
 	if values.Word_type != def.TYPE_ALL {
 		sql += " AND types.word_type = '" + values.Word_type + "'"
 	}
@@ -37,12 +40,11 @@ func GetTypWords(db *sql.DB, values def.TypWordSelect) ([]def.Word, error) {
 		sql += " AND LEFT(words.word, 1) = '" + values.Alphabet + "'"
 	}
 
-
 	sql += " ORDER BY RAND() LIMIT " + strconv.Itoa(values.Quantity)
 
+	// SQL実行
 	result, err := db.Query(sql)
 	if err != nil {
-		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, values, def.ERROR)
 		} else {
@@ -51,9 +53,9 @@ func GetTypWords(db *sql.DB, values def.TypWordSelect) ([]def.Word, error) {
 		return words, err
 	}
 
+	// 取得したデータを構造体に格納
 	for result.Next() {
 		word := def.Word{}
-		// TODO 調べる
 		if err := result.Scan(&word.Word, &word.Parts_of_speech, &word.Description); err != nil {
 			logs.WriteLog(err.Error(),
 			def.Word{
@@ -77,18 +79,21 @@ func GetTypes(db *sql.DB) ([]def.WordType, error) {
 	// 複数件取得する場合、構造体を配列にする
 	var wordTypes []def.WordType
 
-	// sql := "SELECT null FROM word_types ORDER BY word_type ASC"
 	sql := "SELECT word_type FROM word_types ORDER BY word_type ASC"
-	result, err := db.Query(sql)
 
+	// SQL実行
+	result, err := db.Query(sql)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.NONE_SQL_ARGUMENT, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), def.NONE_SQL_ARGUMENT, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), def.NONE_SQL_ARGUMENT, def.ERROR)
 		return wordTypes, err
 	}
 
+	// 取得したデータを構造体に格納
 	for result.Next() {
 		wordType := def.WordType{}
 		if err := result.Scan(&wordType.Word_type); err != nil {
@@ -114,16 +119,20 @@ func GetPartsOfSpeeches(db *sql.DB) ([]def.PartsOfSpeech, error) {
 	var err error
 
 	sql := "SELECT parts_of_speech FROM parts_of_speeches ORDER BY parts_of_speech ASC"
-	result, err := db.Query(sql)
 
+	// SQL実行
+	result, err := db.Query(sql)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.NONE_SQL_ARGUMENT, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), def.NONE_SQL_ARGUMENT, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), def.NONE_SQL_ARGUMENT, def.ERROR)
 		return partsOfSpeeches, err
 	}
 
+	// 取得したデータを構造体に格納
 	for result.Next() {
 		partsOfSpeech := def.PartsOfSpeech{}
 		// Scanは読み取りね
@@ -148,6 +157,7 @@ func MatchUserPassword(db *sql.DB, values def.UserMatchInfo) (string, error) {
 	var userId string
 	var err error
 
+	// バリデーションチェック
 	err = values.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), values, def.ERROR)
@@ -156,6 +166,7 @@ func MatchUserPassword(db *sql.DB, values def.UserMatchInfo) (string, error) {
 
 	sql := "SELECT LPAD(user_id,8,0) FROM users WHERE email = ? AND password = ?"
 
+	// SQL実行
 	result := db.QueryRow(sql, values.Email, values.Password)
 	if err = result.Err(); err != nil {
 		logs.WriteLog(err.Error(), values, def.ERROR)
@@ -180,17 +191,22 @@ func GetWordDetail(db *sql.DB) ([]def.WordDetail, error) {
 	var wordDetails []def.WordDetail
 	var err error
 
+	// SQL文を取得
 	sql := def.GetWordDetailSQL()
 
+	// SQL実行
 	result, err := db.Query(sql)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.NONE_SQL_ARGUMENT, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), def.NONE_SQL_ARGUMENT, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), def.NONE_SQL_ARGUMENT, def.ERROR)
 		return wordDetails, err
 	}
 
+	// 取得したデータを構造体に格納
 	for result.Next() {
 		wordDetail := def.WordDetail{}
 		if err := result.Scan(&wordDetail.Word, &wordDetail.Description, &wordDetail.Parts_of_speech, &wordDetail.Word_type); err != nil {
@@ -218,23 +234,29 @@ func GetWordTypInfo(db *sql.DB, userId def.UserIdStruct) ([]def.TypCount, error)
 	var typWordInfos []def.TypCount
 	var err error
 
+	// バリデーションチェック
 	err = userId.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return typWordInfos, err
 	}
 
+	// SQL文を取得
 	sql := def.GetWordTypInfoSQL()
 
+	// SQL実行
 	result, err := db.Query(sql,userId.User_id)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return typWordInfos, err
 	}
 
+	// 取得したデータを構造体に格納
 	for result.Next() {
 		typWordInfo := def.TypCount{}
 		if err := result.Scan(&typWordInfo.SuccessTypCount, &typWordInfo.MissTypCount); err != nil {
@@ -259,15 +281,28 @@ func GetWordTypInfoSum(db *sql.DB, userId def.UserIdStruct) (def.WordTypInfoSum,
 	var wordTypInfoSum def.WordTypInfoSum
 	var err error
 
+	// バリデーションチェック
 	err = userId.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return wordTypInfoSum, err
 	}
 
+	// SQL文を取得
 	sql := def.GetWordTypInfoSumSQL()
 
+	// SQL実行
 	result := db.QueryRow(sql,userId.User_id)
+	if err = result.Err(); err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
+		}
+		return wordTypInfoSum, err
+	}
+
+	// 取得したデータを構造体に格納
 	if err := result.Scan(&wordTypInfoSum.Typing_count, &wordTypInfoSum.Typing_miss_count); err != nil {
 		logs.WriteLog(err.Error(),
 			def.WordTypInfoSum{
@@ -289,15 +324,28 @@ func GetAlphabetTypInfoSum(db *sql.DB, userId def.UserIdStruct) (def.AlphabetTyp
 	var alphabetTypInfoSum def.AlphabetTypInfoSum
 	var err error
 
+	// バリデーションチェック
 	err = userId.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return alphabetTypInfoSum, err
 	}
 
+	// SQL文を取得
 	sql := def.GetAlphabetTypInfoSumSQL()
 
+	// SQL実行
 	result := db.QueryRow(sql,userId.User_id)
+	if err = result.Err(); err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
+		}
+		return alphabetTypInfoSum, err
+	}
+
+	// 取得したデータを構造体に格納
 	if err := result.Scan(&alphabetTypInfoSum.Typing_count, &alphabetTypInfoSum.Typing_miss_count); err != nil {
 		logs.WriteLog(err.Error(),
 			def.AlphabetTypInfoSum{
@@ -319,23 +367,28 @@ func GetWordCountRanking(db *sql.DB,userId def.UserIdStruct) ([]def.WordCountRan
 	var wordCountRankings []def.WordCountRanking
 	var err error
 
+	// バリデーションチェック
 	err = userId.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return wordCountRankings, err
 	}
 
+	// SQL文を取得
 	sql := def.GetWordCountRankingSQL()
 
 	result, err := db.Query(sql,userId.User_id)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return wordCountRankings, err
 	}
 
+	// 取得したデータを構造体に格納
 	for result.Next() {
 		wordCountRanking := def.WordCountRanking{}
 		if err := result.Scan(&wordCountRanking.Word, &wordCountRanking.Typing_count, &wordCountRanking.Rank_result); err != nil {
@@ -362,23 +415,29 @@ func GetWordMissCountRanking(db *sql.DB,userId def.UserIdStruct) ([]def.WordMiss
 	var wordMissRankings []def.WordMissCountRanking
 	var err error
 
+	// バリデーションチェック
 	err = userId.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return wordMissRankings, err
 	}
 
+	// SQL文を取得
 	sql := def.GetWordMissRankingSQL()
 
+	// SQL実行
 	result, err := db.Query(sql,userId.User_id)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return wordMissRankings, err
 	}
 
+	// 取得したデータを構造体に格納
 	for result.Next() {
 		wordMissRanking := def.WordMissCountRanking{}
 		if err := result.Scan(&wordMissRanking.Word, &wordMissRanking.Typing_miss_count, &wordMissRanking.Rank_result); err != nil {
@@ -406,23 +465,29 @@ func GetAlphabetCountRanking(db *sql.DB,userId def.UserIdStruct) ([]def.Alphabet
 	var alphabetCountRankings []def.AlphabetCountRanking
 	var err error
 
+	// バリデーションチェック
 	err = userId.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return alphabetCountRankings, err
 	}
 
+	// SQL文を取得
 	sql := def.GetAlphabetCountRankingSQL()
 
+	// SQL実行
 	result, err := db.Query(sql,userId.User_id)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return alphabetCountRankings, err
 	}
 
+	// 取得したデータを構造体に格納
 	for result.Next() {
 		alphabetCountRanking := def.AlphabetCountRanking{}
 		if err := result.Scan(&alphabetCountRanking.Alphabet, &alphabetCountRanking.Typing_count, &alphabetCountRanking.Rank_result); err != nil {
@@ -449,23 +514,29 @@ func GetAlphabetMissCountRanking(db *sql.DB,userId def.UserIdStruct) ([]def.Alph
 	var alphabetMissCountRankings []def.AlphabetMissCountRanking
 	var err error
 
+	// バリデーションチェック
 	err = userId.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return alphabetMissCountRankings, err
 	}
 	
+	// SQL文を取得
 	sql := def.GetAlphabetMissRankingSQL()
 
+	// SQL実行
 	result, err := db.Query(sql,userId.User_id)
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return alphabetMissCountRankings, err
 	}
 
+	// 取得したデータを構造体に格納
 	for result.Next() {
 		alphabetMissCountRanking := def.AlphabetMissCountRanking{}
 		if err := result.Scan(&alphabetMissCountRanking.Alphabet, &alphabetMissCountRanking.Typing_miss_count, &alphabetMissCountRanking.Rank_result); err != nil {
@@ -492,6 +563,7 @@ func TranMatchUserPassword(tx *sql.Tx, values def.UserMatchInfo) (string, error)
 	var userId string
 	var err error
 
+	// バリデーションチェック
 	err = values.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), values, def.ERROR)
@@ -500,18 +572,19 @@ func TranMatchUserPassword(tx *sql.Tx, values def.UserMatchInfo) (string, error)
 
 	sql := "SELECT LPAD(user_id,8,0) FROM users WHERE email = ? AND password = ?"
 
+	// SQL実行
 	result := tx.QueryRow(sql, values.Email, values.Password)
 	if err = result.Err(); err != nil {
 		logs.WriteLog(err.Error(), values, def.ERROR)
 		return userId, err
 	}
 	
+	// 取得したデータを構造体に格納
 	err = result.Scan(&userId)
 	if err != nil {
 		logs.WriteLog(err.Error(), values, def.ERROR)
 		return userId, err
 	}
-
 
 	logs.WriteLog("MatchUserPassword正常終了", nil, def.NORMAL)
 	return userId, err

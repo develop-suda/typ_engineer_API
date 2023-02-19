@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -28,6 +27,7 @@ func TypWordSelectHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// パラメータをvaluesに格納
 	values := def.TypWordSelect{
 		Word_type:       r.FormValue("type"),
 		Parts_of_speech: r.FormValue("parts_of_speech"),
@@ -35,20 +35,31 @@ func TypWordSelectHandler(w http.ResponseWriter, r *http.Request) {
 		Quantity:        intQuantity,
 	}
 
+	// DBに接続
 	db := connect.DbConnect()
+	if db != nil {
+		return
+	}
+
+	// DB接続を閉じる
 	defer db.Close()
+
+	// DBからデータを取得
 	if result, err = selectItems.GetTypWords(db, values); err != nil {
 		return
 	}
 
+	// DBの取得結果をjsonに変換
 	json, err := json.Marshal(result)
 	if err != nil {
 		return
 	}
 
+	// ヘッダーを設定
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 
+	// jsonを返す
 	w.Write(json)
 }
 
@@ -57,8 +68,16 @@ func GetTypeHandler(w http.ResponseWriter, r *http.Request) {
 	var result []def.WordType
 	var err error
 
+	// DBに接続
 	db := connect.DbConnect()
+	if db != nil {
+		return
+	}
+
+	// DB接続を閉じる
 	defer db.Close()
+
+	// DBからデータを取得
 	if result, err = selectItems.GetTypes(db); err != nil {
 		return
 	}
@@ -69,9 +88,11 @@ func GetTypeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// ヘッダーを設定
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 
+	// jsonを返す
 	w.Write(json)
 }
 
@@ -80,8 +101,15 @@ func GetPartsOfSpeechHandler(w http.ResponseWriter, r *http.Request) {
 	var result []def.PartsOfSpeech
 	var err error
 
+	// DBに接続
 	db := connect.DbConnect()
+	if db != nil {
+		return
+	}
+	// DB接続を閉じる
 	defer db.Close()
+
+	// DBからデータを取得
 	if result, err = selectItems.GetPartsOfSpeeches(db); err != nil {
 		return
 	}
@@ -92,9 +120,11 @@ func GetPartsOfSpeechHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// ヘッダーを設定
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 
+	// jsonを返す
 	w.Write(json)
 }
 
@@ -104,7 +134,7 @@ func UserRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var userId string
 	var loginData def.LoginData
 
-	// HTTPリクエストパラメータを取得
+	// パラメータをvaluesに格納
 	values := def.UserRegisterInfo{
 		Last_name:  r.FormValue("last_name"),
 		First_name: r.FormValue("first_name"),
@@ -113,17 +143,18 @@ func UserRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// パスワードが一致か確認するために取得
-	userMatcInfo := def.UserMatchInfo{
+	userMatchInfo := def.UserMatchInfo{
 		Email:    values.Email,
 		Password: values.Password,
 	}
 	
+	// DBに接続
 	db := connect.DbConnect()
-	if err != nil {
+	if db != nil {
 		return
 	}
 
-	// トランザクション
+	// トランザクション開始
 	tx, err := db.Begin()
 	if err != nil {
 		return
@@ -138,11 +169,17 @@ func UserRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	// ユーザ登録
 	if err = insert.CreateUser(tx, values); err != nil { return }
-	if userId, err = selectItems.TranMatchUserPassword(tx, userMatcInfo); err != nil { return }
+	// パラメータにあるemailとpasswordが一致するユーザIDを取得
+	if userId, err = selectItems.TranMatchUserPassword(tx, userMatchInfo); err != nil { return }
+	// 単語の初期情報を登録
 	if err = insert.InsertTypWordInformation(tx, userId); err != nil { return }
+	// アルファベットの初期情報を登録
 	if err = insert.InsertTypAlphabetInformation(tx, userId); err != nil { return }
+	// ログイン情報を登録
 	if err = login.TranInsertLoginData(tx, userId); err != nil { return }
+	// ユーザIDを取得できた場合jwtトークンを発行
 	if loginData, err = login.CreateToken(userId); err != nil { return }
 
 	// loginDataをjsonに変換
@@ -151,52 +188,43 @@ func UserRegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// ヘッダーを設定
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
 
+	// jsonを返す
 	w.Write(json)
 
 }
 
 func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
-
 	var userId string
 	var loginData def.LoginData
 	var err error
 
+	// パラメータをvaluesに格納
 	values := def.UserMatchInfo{
 		Email:    r.FormValue("email"),
 		Password: r.FormValue("password"),
 	}
 
+	// DBに接続
 	db := connect.DbConnect()
 	if err != nil {
-		panic(err)
+		return
 	}
 	
+	// DB接続を閉じる
 	defer db.Close()
-	
 
-	// ユーザIDとパスワードが一致するか確認
-	// 一致した場合はユーザIDを取得
-	if userId, err = selectItems.MatchUserPassword(db, values); err != nil {
-		return
-	}
-
-	// ユーザIDを取得できた場合ログインデータをDBにインサート
-	if err = login.InsertLoginData(db, userId); err != nil {
-		return
-	}
-
+	// パラメータにあるemailとpasswordが一致するユーザIDを取得
+	if userId, err = selectItems.MatchUserPassword(db, values); err != nil { return }
+	// ログイン情報を登録
+	if err = login.InsertLoginData(db, userId); err != nil { return }
 	// ユーザIDを取得できた場合jwtトークンを発行
-	if loginData, err = login.CreateToken(userId); err != nil {
-		return
-	}
+	if loginData, err = login.CreateToken(userId); err != nil { return }
 
 	//loginDataをjsonに変換
 	json, err := json.Marshal(loginData)
@@ -204,64 +232,98 @@ func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// ヘッダーを設定
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
+
+	// jsonを返す
 	w.Write(json)
 
 }
 
 func UserLogoutHandler(w http.ResponseWriter, r *http.Request) {
-		
+
+	var err error
+
+	// パラメータをuserIdに格納
+	userId := def.UserIdStruct{User_id: r.FormValue("userId")}
+
+	// DBに接続
+	db := connect.DbConnect()
+	if err != nil {
+		return
+	}
+	// DB接続を閉じる
+	defer db.Close()
+
+	// ログアウト情報を登録
+	if err = logout.UpdateLogoutData(db, userId); err != nil { return }
+
+	// ヘッダーを設定
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
-
-	var err error
-	userId := def.UserIdStruct{User_id: r.FormValue("userId")}
-
-	db := connect.DbConnect()
-	defer db.Close()
-	if err = logout.UpdateLogoutData(db, userId); err != nil {
-		return
-	}
 
 }
 
 func UpdateTypeInfoHandler(w http.ResponseWriter, r *http.Request) {
 
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
-
 	var typWordInfos []def.TypWordInfo
 	var typAlphaInfos []def.TypAlphabetInfo	
 	var err error
 
+	// パラメータをvaluesに格納
 	values := map[string]string{
 		 "typWordInfo":        r.FormValue("typWordInfo"),
 		 "typAlphabetInfo":    r.FormValue("typAlphaInfo"),
 	}
 
+	// パラメータをuserIdに格納
 	userId := def.UserIdStruct{User_id: r.FormValue("userId")}
 
-	// jsonを構造体に変換できるかどうか確認
+	// 単語の入力情報jsonを構造体に変換できるかどうか確認
  	err = json.Unmarshal([]byte(values["typWordInfo"]), &typWordInfos)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 
-	// jsonを構造体に変換できるかどうか確認
+	// アルファベット入力情報jsonを構造体に変換できるかどうか確認
 	err = json.Unmarshal([]byte(values["typAlphabetInfo"]), &typAlphaInfos)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 
-	// ToDo トランザクションにする
-	// 入力した単語情報とアルファベット情報をDBに登録
+	// DBに接続
 	db := connect.DbConnect()
-	defer db.Close()		
-	if err = update.UpdateTypWordInfo(db, typWordInfos, userId); err != nil { return }
-	if err = update.UpdateTypAlphabetInfo(db, typAlphaInfos, userId); err != nil { return }
+	if db != nil {
+		return
+	}
+
+	// トランザクション開始
+	tx, err := db.Begin()
+	if err != nil {
+		return
+	}
+
+	// トランザクションのコミット、ロールバック
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		} else {
+			tx.Commit()
+		}
+	}()
+	
+	// 単語の入力情報を更新
+	if err = update.UpdateTypWordInfo(tx, typWordInfos, userId); err != nil { return }
+	// アルファベットの入力情報を更新
+	if err = update.UpdateTypAlphabetInfo(tx, typAlphaInfos, userId); err != nil { return }
+
+	// ヘッダーを設定
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST,OPTIONS")
 
 }
 
@@ -270,7 +332,13 @@ func GetWordDetailHandler(w http.ResponseWriter, r *http.Request) {
 	var wordDetails []def.WordDetail
 	var err error
 	
+	// DBに接続
 	db := connect.DbConnect()
+	if err != nil {
+		return
+	}
+
+	// DB接続を閉じる
 	defer db.Close()
 	
 	//DBから単語情報を取得
@@ -284,9 +352,11 @@ func GetWordDetailHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// ヘッダーを設定
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 
+	// jsonを返す
 	w.Write(json)
 
 }
@@ -296,9 +366,16 @@ func GetTypCountAllWordHandler(w http.ResponseWriter, r *http.Request){
 	var typWordInfos []def.TypCount
 	var err error
 
+	// パラメータをuserIdに格納
 	userId := def.UserIdStruct{User_id: r.FormValue("userId")}
 
+	// DBに接続
 	db := connect.DbConnect()
+	if err != nil {
+		return
+	}
+	
+	// DB接続を閉じる
 	defer db.Close()
 
 	//DBから単語入力情報を取得
@@ -312,22 +389,32 @@ func GetTypCountAllWordHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
+	// ヘッダーを設定
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 
+	// jsonを返す
 	w.Write(json)
 }
 
 func GetMyPageDataHandler(w http.ResponseWriter, r *http.Request) {
 
-	userId := def.UserIdStruct{User_id: r.FormValue("userId")}
 	var myPageData def.MyPageData
 	var err error
 
+	// パラメータをuserIdに格納
+	userId := def.UserIdStruct{User_id: r.FormValue("userId")}
+
+	// DBに接続
 	db := connect.DbConnect()
+	if err != nil {
+		return
+	}
+
+	// DB接続を閉じる
 	defer db.Close()
 
-	//DBからユーザ情報を取得
+	// DBからユーザ情報を取得
 	// 単語の入力成功、失敗回数を取得
 	if myPageData.WordTypInfoSum, err = selectItems.GetWordTypInfoSum(db, userId); err != nil { return }
 
@@ -342,15 +429,17 @@ func GetMyPageDataHandler(w http.ResponseWriter, r *http.Request) {
 	if myPageData.AlphabetCountRanking, err = selectItems.GetAlphabetCountRanking(db, userId); err != nil { return }
 	if myPageData.AlphabetMissCountRanking, err = selectItems.GetAlphabetMissCountRanking(db, userId); err != nil { return }
 
-	//DBの取得結果をjsonに変換
+	// DBの取得結果をjsonに変換
 	json, err := json.Marshal(myPageData)
 	if err != nil {
 		return
 	}
 
+	// ヘッダーを設定
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:8080")
 
+	// jsonを返す
 	w.Write(json)
 
 }

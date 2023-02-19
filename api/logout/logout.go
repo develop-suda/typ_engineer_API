@@ -13,28 +13,24 @@ import(
 func UpdateLogoutData(db *sql.DB, userId def.UserIdStruct) error {
 	logs.WriteLog("UpdateLogoutData開始", nil, def.NORMAL)
 
+	// バリデーションチェック
 	err := userId.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
 	}
 
-	sql := def.UPDATE_LOGOUT_DATA_SQL
-
-	//トランザクション開始
-	tx, err := db.Begin()
-	defer tx.Commit()
-	if err != nil {
-		logs.WriteLog(err.Error(), userId, def.ERROR)
-		return err
-	}
+	// sqlを取得
+	sql := def.GetUpdateLogoutDataSQL()
 
 	//SQL実行
-	_, err = tx.Exec(sql, userId.User_id)
+	_, err = db.Exec(sql, userId.User_id)
 	
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err

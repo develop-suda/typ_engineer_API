@@ -11,7 +11,7 @@ import (
 )
 
 // wordのタイピング情報を更新する関数
-func UpdateTypWordInfo(db *sql.DB, values []def.TypWordInfo, userId def.UserIdStruct) error {
+func UpdateTypWordInfo(tx *sql.Tx, values []def.TypWordInfo, userId def.UserIdStruct) error {
 	logs.WriteLog("UpdateTypWordInfo開始", nil, def.NORMAL)
 
 	var typWordInfos []def.TypWordInfo
@@ -34,17 +34,19 @@ func UpdateTypWordInfo(db *sql.DB, values []def.TypWordInfo, userId def.UserIdSt
 		}
 	}
 
+	// バリデーションチェック
 	err = userId.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
 	}
 
+	// sqlを取得
 	sql := def.GetUpdateTypWordInfoSQL()
 
 	//SQL実行
 	for _, typWordInfo := range typWordInfos {
-		_, err := db.Exec(sql, typWordInfo.SuccessTypCount, typWordInfo.MissTypCount, userId.User_id, typWordInfo.Word)
+		_, err := tx.Exec(sql, typWordInfo.SuccessTypCount, typWordInfo.MissTypCount, userId.User_id, typWordInfo.Word)
 		if err != nil {
 			if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 				logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, 
@@ -65,7 +67,7 @@ func UpdateTypWordInfo(db *sql.DB, values []def.TypWordInfo, userId def.UserIdSt
 }
 
 // アルファベットのタイピング情報を更新する関数
-func UpdateTypAlphabetInfo(db *sql.DB, typAlphabetInfos []def.TypAlphabetInfo, userId def.UserIdStruct) error {
+func UpdateTypAlphabetInfo(tx *sql.Tx, typAlphabetInfos []def.TypAlphabetInfo, userId def.UserIdStruct) error {
 	logs.WriteLog("UpdateTyoAlphabetInfo開始", nil, def.NORMAL)
 	
 	var err error
@@ -85,21 +87,24 @@ func UpdateTypAlphabetInfo(db *sql.DB, typAlphabetInfos []def.TypAlphabetInfo, u
 		}
 	}
 
+	// バリデーションチェック
 	err = userId.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
 	}
 
+	// sqlを取得
 	sql := def.GetUpdateTypAlphabetInfoSQL()
 
+	//SQL実行
 	for _, typAlphabetInfo := range typAlphabetInfos {
 		// タイピング成功回数とタイピング失敗回数が0の場合は更新しない
 		// どちらも0の場合は、タイピング情報がないということなので更新しない
 		// Earlyreturn ミノコードの賜物
 		if typAlphabetInfo.SuccessTypCount == 0 && typAlphabetInfo.MissTypCount == 0 { continue }
 		
-		_, err := db.Exec(sql, typAlphabetInfo.SuccessTypCount, typAlphabetInfo.MissTypCount, userId.User_id, typAlphabetInfo.Alphabet)
+		_, err := tx.Exec(sql, typAlphabetInfo.SuccessTypCount, typAlphabetInfo.MissTypCount, userId.User_id, typAlphabetInfo.Alphabet)
 		if err != nil {
 			if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 				logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql,

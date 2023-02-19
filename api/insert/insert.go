@@ -21,8 +21,10 @@ func CreateUser(tx *sql.Tx, values def.UserRegisterInfo) error {
 
 	var err error
 
+	// sqlを取得
     sql := def.GetInsertUserSQL()
 
+	// バリデーションチェック実行
 	err = values.Validate()
 	if err != nil {
 		logs.WriteLog(err.Error(), values, def.ERROR)
@@ -35,6 +37,8 @@ func CreateUser(tx *sql.Tx, values def.UserRegisterInfo) error {
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, values, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), values, def.ERROR)
 		}
 		return err
 	}
@@ -49,14 +53,16 @@ func InsertTypWordInformation(tx *sql.Tx, userId string) error {
 
 	var words []tempStructWord
 
+	// sqlを取得
 	sql := def.GetWordUniqueSQL()
 
 	// 重複しない全単語を取得
 	selectWords, err := tx.Query(sql)
 	if err != nil {
-		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
@@ -65,7 +71,6 @@ func InsertTypWordInformation(tx *sql.Tx, userId string) error {
 	// 取得した単語を配列に格納
 	for selectWords.Next() {
 		word := tempStructWord{}
-		// TODO 調べる
 		if err := selectWords.Scan(&word.Word); err != nil {
 			logs.WriteLog(err.Error(), 
 				tempStructWord{Word: word.Word},def.ERROR)
@@ -74,21 +79,24 @@ func InsertTypWordInformation(tx *sql.Tx, userId string) error {
 		words = append(words, word)
 	}
 
-	sql = def.INSERT_TYPING_WORD_INFORMATIONS_SQL
+	// wordのタイピング情報の更新先を登録するSQLを取得
+	sql = def.GetInsertTypingWordInformationsSQL()
 
 	// 取得した単語を元にINSERT文を作成
 	for _,value := range words {
 		sql += "(" + userId + ", '" + value.Word + "',0,0,cast(now() as datetime),cast(now() as datetime),0),"
 	}
 
+	// 最後のカンマを削除
 	sql = sql[:len(sql)-1]
 
-	// wordのタイピング情報の更新先を登録する
+	// 単語の初期登録を行う
 	result, err := tx.Exec(sql)
 	if err != nil {
-		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
@@ -108,7 +116,8 @@ func InsertTypWordInformation(tx *sql.Tx, userId string) error {
 func InsertTypAlphabetInformation(tx *sql.Tx, userId string) error {
 	logs.WriteLog("InsertTypAlphabetInfo開始", nil, def.NORMAL)
 
-	sql := def.INSERT_TYPING_ALPHABET_INFORMATIONS_SQL
+	// アルファベットのタイピング情報の更新先を登録するSQLを取得
+	sql := def.GetInsertTypingAlphabetInformationsSQL()
 
 	//　アルファベットのタイピング情報の更新先を登録する
 	// unicodeはa~zまでのアルファベットのコード
@@ -116,14 +125,16 @@ func InsertTypAlphabetInformation(tx *sql.Tx, userId string) error {
 		sql += "(" + userId + ", '" + string(unicode) + "',0,0,cast(now() as datetime),cast(now() as datetime),0),"
 	}
 
+	// 最後のカンマを削除
 	sql = sql[:len(sql)-1]
 
-	// アルファベットのタイピング情報の更新先を登録する
+	// アルファベットの初期登録を行う
 	result, err := tx.Exec(sql)
 	if err != nil {
-		// TODO 調べる
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err

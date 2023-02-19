@@ -19,7 +19,6 @@ func CreateToken(userId string) (def.LoginData, error) {
 	var err error
 
 	//jwt認証をする
-	// TODO jwtを調べる
 	// Claimsオブジェクトの作成
 	claims := jwt.MapClaims {
 		"user_id": userId,
@@ -43,7 +42,9 @@ func CreateToken(userId string) (def.LoginData, error) {
 
 func InsertLoginData(tx *sql.DB, userId string) error {
 	logs.WriteLog("InsertLoginData開始", nil, def.NORMAL)
-	sql := def.INSERT_LOGIN_DATA_SQL
+
+	// sqlを取得
+	sql := def.GetInsertLoginDataSQL()
 
 	//SQL実行
 	_, err := tx.Exec(sql, userId)
@@ -51,6 +52,8 @@ func InsertLoginData(tx *sql.DB, userId string) error {
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
@@ -62,7 +65,9 @@ func InsertLoginData(tx *sql.DB, userId string) error {
 
 func TranInsertLoginData(tx *sql.Tx, userId string) error {
 	logs.WriteLog("InsertLoginData開始", nil, def.NORMAL)
-	sql := def.INSERT_LOGIN_DATA_SQL
+
+	// sqlを取得
+	sql := def.GetInsertLoginDataSQL()
 
 	//SQL実行
 	_, err := tx.Exec(sql, userId)
@@ -70,6 +75,8 @@ func TranInsertLoginData(tx *sql.Tx, userId string) error {
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
 		logs.WriteLog(err.Error(), userId, def.ERROR)
 		return err
