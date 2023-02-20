@@ -3,7 +3,6 @@ package login
 import (
 	"fmt"
 	"time"
-	"log"
 	"database/sql"
 
 	"github.com/go-sql-driver/mysql"
@@ -13,12 +12,13 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"	
 )
 
-func CreateToken(userId string) def.LoginData {
+func CreateToken(userId string) (def.LoginData, error) {
+	logs.WriteLog("CreateToken開始", nil, def.NORMAL)
 
 	var loginData def.LoginData
+	var err error
 
 	//jwt認証をする
-	// TODO jwtを調べる
 	// Claimsオブジェクトの作成
 	claims := jwt.MapClaims {
 		"user_id": userId,
@@ -29,31 +29,59 @@ func CreateToken(userId string) def.LoginData {
 	tokenString, err := token.SignedString([]byte("secret"))
 	if err != nil {
 		fmt.Println(err)
+		return loginData, err
 	}
 
 	loginData.User_id = userId
 	loginData.TokenString = tokenString
 
-	return loginData
+	logs.WriteLog("CreateToken正常終了", nil, def.NORMAL)
+	return loginData, err
 }
 
 
-func InsertLoginData(tx *sql.DB, userId string) {
-	logs.WriteLog("InsertLoginData開始", def.NORMAL)
-	sql := def.INSERT_LOGIN_DATA_SQL
+func InsertLoginData(tx *sql.DB, userId string) error {
+	logs.WriteLog("InsertLoginData開始", nil, def.NORMAL)
+
+	// sqlを取得
+	sql := def.GetInsertLoginDataSQL()
 
 	//SQL実行
 	_, err := tx.Exec(sql, userId)
-	//commit
-	// defer tx.Commit()
 	
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
-		log.Fatal(err)
+		logs.WriteLog(err.Error(), userId, def.ERROR)
+		return err
 	}
 
-	logs.WriteLog("InsertLoginData正常終了", def.NORMAL)
-	return
+	logs.WriteLog("InsertLoginData正常終了", nil, def.NORMAL)
+	return nil
+}
+
+func TranInsertLoginData(tx *sql.Tx, userId string) error {
+	logs.WriteLog("InsertLoginData開始", nil, def.NORMAL)
+
+	// sqlを取得
+	sql := def.GetInsertLoginDataSQL()
+
+	//SQL実行
+	_, err := tx.Exec(sql, userId)
+	
+	if err != nil {
+		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
+		}
+		logs.WriteLog(err.Error(), userId, def.ERROR)
+		return err
+	}
+
+	logs.WriteLog("InsertLoginData正常終了", nil, def.NORMAL)
+	return nil
 }

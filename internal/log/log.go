@@ -12,10 +12,7 @@ import (
 	carbon "github.com/golang-module/carbon"
 )
 
-func WriteLog(message interface{}, logType string) {
-	// TODO エラーログの書き込み時のエラー処理を追加する
-	// TODO エラーした場合のJSONを考える
-	// TODO エラー時のreturnを考える
+func WriteLog(message interface{}, data interface{}, logType string) {
 
 	year, month, day := carbon.Now().Date()
 	monthStr := strconv.Itoa(month)
@@ -34,16 +31,16 @@ func WriteLog(message interface{}, logType string) {
 
 	loggingSettings(today+".log", logType)
 
-	log.Println(message)
-
 	if logType == def.ERROR {
 		// pcはメモリのアドレス, fileは呼び出したファイルパス, lineは関数が呼ばれた行番号
 		pc, file, line, _ := runtime.Caller(1)
 
 		// 関数名を取得
 		f := runtime.FuncForPC(pc)
-		value := fmt.Sprintf("\ncall:%s\ndata:%s\nfile:%s:%d\n", f.Name(), "test", file, line)
+		value := fmt.Sprintf("\nmessage:%s\ncall:%s\ndata:%+v\nfile:%s:%d\n", message ,f.Name(), data, file, line)
 		log.Println(value)
+	} else if logType == def.NORMAL {
+		log.Println(message)
 	}
 
 	_, err := os.Open(WriteLogPath + today + ".log")

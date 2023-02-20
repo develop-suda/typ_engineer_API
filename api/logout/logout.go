@@ -1,7 +1,6 @@
 package logout
 
 import(
-	"log"
 	"fmt"
 	"database/sql"
 
@@ -11,27 +10,32 @@ import(
 	logs "github.com/develop-suda/typ_engineer_API/internal/log"
 )
 
-func UpdateLogoutData(db *sql.DB, userId string) {
-	logs.WriteLog("UpdateLogoutData開始", def.NORMAL)
-	sql := def.UPDATE_LOGOUT_DATA_SQL
+func UpdateLogoutData(db *sql.DB, userId def.UserIdStruct) error {
+	logs.WriteLog("UpdateLogoutData開始", nil, def.NORMAL)
 
-	//トランザクション開始
-	tx, err := db.Begin()
+	// バリデーションチェック
+	err := userId.Validate()
 	if err != nil {
-		log.Fatal(err)
+		logs.WriteLog(err.Error(), userId, def.ERROR)
+		return err
 	}
 
+	// sqlを取得
+	sql := def.GetUpdateLogoutDataSQL()
+
 	//SQL実行
-	_, err = tx.Exec(sql, userId)
-	//commit
-	defer tx.Commit()
+	_, err = db.Exec(sql, userId.User_id)
 	
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+			logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, userId, def.ERROR)
+		} else {
+			logs.WriteLog(err.Error(), userId, def.ERROR)
 		}
-		log.Fatal(err)
+		logs.WriteLog(err.Error(), userId, def.ERROR)
+		return err
 	}
 	
-	logs.WriteLog("UpdateLogoutData終了", def.NORMAL)
+	logs.WriteLog("UpdateLogoutData終了", nil, def.NORMAL)
+	return nil
 }

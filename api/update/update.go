@@ -3,8 +3,6 @@ package update
 import (
 	"database/sql"
 	"fmt"
-	"log"
-	"encoding/json"
 
 	"github.com/go-sql-driver/mysql"
 
@@ -13,71 +11,116 @@ import (
 )
 
 // wordのタイピング情報を更新する関数
-func UpdateTypWordInfo(db *sql.DB, values map[string]string) {
-	logs.WriteLog("UpdateTypWordInfo開始", def.NORMAL)
+func UpdateTypWordInfo(tx *sql.Tx, values []def.TypWordInfo, userId def.UserIdStruct) error {
+	logs.WriteLog("UpdateTypWordInfo開始", nil, def.NORMAL)
+
 	var typWordInfos []def.TypWordInfo
+	var err error
 
-	sql := GetUpdateTypWordInfoSQL()
+	typWordInfos = values
 
-	userId := values["userId"]
-	temp := values["typWordInfo"]
- 	json.Unmarshal([]byte(temp), &typWordInfos)
-
-	//SQL実行
+	// バリデーションチェックをループで行う
 	for _, typWordInfo := range typWordInfos {
-		_, err := db.Exec(sql, typWordInfo.SuccessTypCount, typWordInfo.MissTypCount, userId, typWordInfo.Word)
+		err = typWordInfo.Validate()
 		if err != nil {
-			if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-				logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
-			}
-			log.Fatal(err)
+			logs.WriteLog(err.Error(), 
+				def.TypWordInfo{
+					Word: typWordInfo.Word,
+					SuccessTypCount: typWordInfo.SuccessTypCount,
+					MissTypCount: typWordInfo.MissTypCount,
+				},
+			def.ERROR)
+			return err
 		}
 	}
 
-	logs.WriteLog("UpdateTypWordInfo正常終了", def.NORMAL)
-	return
+	// バリデーションチェック
+	err = userId.Validate()
+	if err != nil {
+		logs.WriteLog(err.Error(), userId, def.ERROR)
+		return err
+	}
+
+	// sqlを取得
+	sql := def.GetUpdateTypWordInfoSQL()
+
+	//SQL実行
+	for _, typWordInfo := range typWordInfos {
+		_, err := tx.Exec(sql, typWordInfo.SuccessTypCount, typWordInfo.MissTypCount, userId.User_id, typWordInfo.Word)
+		if err != nil {
+			if mysqlErr, ok := err.(*mysql.MySQLError); ok {
+				logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, 
+					def.TypWordInfo{
+						Word: typWordInfo.Word,
+						SuccessTypCount: typWordInfo.SuccessTypCount,
+						MissTypCount: typWordInfo.MissTypCount,
+					},
+				def.ERROR)
+			}
+			logs.WriteLog(err.Error(), sql, def.ERROR)
+			return err
+		}
+	}
+
+	logs.WriteLog("UpdateTypWordInfo正常終了", nil, def.NORMAL)
+	return nil
 }
 
 // アルファベットのタイピング情報を更新する関数
-func UpdateTypAlphabetInfo(db *sql.DB, values map[string]string) {
-	logs.WriteLog("UpdateTyoAlphabetInfo開始", def.NORMAL)
-	var typAlphabetInfos []def.TypAlphabetInfo
-	sql := GetUpdateTypAlphabetInfoSQL()
+func UpdateTypAlphabetInfo(tx *sql.Tx, typAlphabetInfos []def.TypAlphabetInfo, userId def.UserIdStruct) error {
+	logs.WriteLog("UpdateTyoAlphabetInfo開始", nil, def.NORMAL)
+	
+	var err error
 
-	userId := values["userId"]
-	temp := values["typAlphabetInfo"]
-	json.Unmarshal([]byte(temp), &typAlphabetInfos)
+	// バリデーションチェックをループで行う
+	for _, typAlphabetInfo := range typAlphabetInfos {
+		err = typAlphabetInfo.Validate()
+		if err != nil {
+			logs.WriteLog(err.Error(), 
+				def.TypAlphabetInfo{
+					Alphabet: typAlphabetInfo.Alphabet,
+					SuccessTypCount: typAlphabetInfo.SuccessTypCount,
+					MissTypCount: typAlphabetInfo.MissTypCount,
+				},
+			def.ERROR)
+			return err
+		}
+	}
 
+	// バリデーションチェック
+	err = userId.Validate()
+	if err != nil {
+		logs.WriteLog(err.Error(), userId, def.ERROR)
+		return err
+	}
+
+	// sqlを取得
+	sql := def.GetUpdateTypAlphabetInfoSQL()
+
+	//SQL実行
 	for _, typAlphabetInfo := range typAlphabetInfos {
 		// タイピング成功回数とタイピング失敗回数が0の場合は更新しない
 		// どちらも0の場合は、タイピング情報がないということなので更新しない
 		// Earlyreturn ミノコードの賜物
 		if typAlphabetInfo.SuccessTypCount == 0 && typAlphabetInfo.MissTypCount == 0 { continue }
 		
-		_, err := db.Exec(sql, typAlphabetInfo.SuccessTypCount, typAlphabetInfo.MissTypCount, userId, typAlphabetInfo.Alphabet)
+		_, err := tx.Exec(sql, typAlphabetInfo.SuccessTypCount, typAlphabetInfo.MissTypCount, userId.User_id, typAlphabetInfo.Alphabet)
 		if err != nil {
 			if mysqlErr, ok := err.(*mysql.MySQLError); ok {
-				logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql, def.ERROR)
+				logs.WriteLog(fmt.Sprintf("%d", mysqlErr.Number)+" "+mysqlErr.Message+"\n"+sql,
+					def.TypAlphabetInfo{
+						Alphabet: typAlphabetInfo.Alphabet,
+						SuccessTypCount: typAlphabetInfo.SuccessTypCount,
+						MissTypCount: typAlphabetInfo.MissTypCount,
+					},
+				def.ERROR)
 			}
-			log.Fatal(err)
+			logs.WriteLog(err.Error, sql, def.ERROR)
+			return err
 		}
 	
 	}
 
-	logs.WriteLog("UpdateTyoAlphabetInfo正常終了", def.NORMAL)
-	return
-}
-
-// ログイン情報を更新するSQLを返す関数
-func GetUpdateLogoutDataSQL() string {
-	return def.UPDATE_LOGOUT_DATA_SQL
-}
-// 単語のタイピング情報を更新するSQLを返す関数
-func GetUpdateTypWordInfoSQL() string {
-	return def.UPDATE_TYP_WORD_INFO_SQL
-}
-
-// アルファベットのタイピング情報を更新するSQLを返す関数
-func GetUpdateTypAlphabetInfoSQL() string {
-	return def.UPDATE_TYP_ALPHABET_INFO_SQL
+	logs.WriteLog("UpdateTyoAlphabetInfo正常終了", nil, def.NORMAL)
+	return nil
 }

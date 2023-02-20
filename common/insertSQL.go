@@ -44,3 +44,19 @@ const (
 	INSERT INTO typing_alphabet_informations
 	VALUES `
 )
+
+func GetInsertUserSQL() string {
+	return INSERT_USER_SQL
+}
+
+func GetInsertLoginDataSQL() string {
+	return INSERT_LOGIN_DATA_SQL
+}
+
+func GetInsertTypingWordInformationsSQL() string {
+	return INSERT_TYPING_WORD_INFORMATIONS_SQL
+}
+
+func GetInsertTypingAlphabetInformationsSQL() string {
+	return INSERT_TYPING_ALPHABET_INFORMATIONS_SQL
+}
