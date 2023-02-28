@@ -37,7 +37,7 @@ func TypWordSelectHandler(w http.ResponseWriter, r *http.Request) {
 
 	// DBに接続
 	db := connect.DbConnect()
-	if db != nil {
+	if db == nil {
 		return
 	}
 
@@ -70,7 +70,7 @@ func GetTypeHandler(w http.ResponseWriter, r *http.Request) {
 
 	// DBに接続
 	db := connect.DbConnect()
-	if db != nil {
+	if db == nil {
 		return
 	}
 
@@ -103,7 +103,7 @@ func GetPartsOfSpeechHandler(w http.ResponseWriter, r *http.Request) {
 
 	// DBに接続
 	db := connect.DbConnect()
-	if db != nil {
+	if db == nil {
 		return
 	}
 	// DB接続を閉じる
@@ -150,7 +150,7 @@ func UserRegisterHandler(w http.ResponseWriter, r *http.Request) {
 	
 	// DBに接続
 	db := connect.DbConnect()
-	if db != nil {
+	if db == nil {
 		return
 	}
 
@@ -296,7 +296,7 @@ func UpdateTypeInfoHandler(w http.ResponseWriter, r *http.Request) {
 
 	// DBに接続
 	db := connect.DbConnect()
-	if db != nil {
+	if db == nil {
 		return
 	}
 
