@@ -29,6 +29,9 @@ type (
 	}
 
 	TypCount struct {
+		Word string `json:"word"`
+		Parts_of_speech string `json:"parts_of_speech"`
+		Word_type string `json:"word_type"`
 		SuccessTypCount int `json:"successTypCount"`
 		MissTypCount int `json:"missTypCount"`
 	}

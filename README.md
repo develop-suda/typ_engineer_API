@@ -2,7 +2,7 @@
 
 ・タイピング画面↓
 
-<img width="652" alt="スクリーンショット 2023-02-20 15 07 31" src="https://user-images.githubusercontent.com/71370709/220164632-a14bdbd4-c1eb-4650-bb6f-c5e3d7d91281.png">
+<img width="694" alt="スクリーンショット 2023-03-01 3 14 42" src="https://user-images.githubusercontent.com/71370709/221943386-f8ec1fd7-6c8b-44e7-bd94-85d5202ad316.png">
 
 ## 本プロジェクトの発足理由
 

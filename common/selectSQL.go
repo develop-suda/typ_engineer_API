@@ -42,12 +42,21 @@ const (
 	// SELECT_WORD_TYP_INFO_SQL : 単語のタイピング情報を取得するSQL
 	SELECT_WORD_TYP_INFO_SQL =`
 	SELECT
-    	typing_count,
-    	typing_miss_count
-	FROM v_typing_word_informations
-	WHERE user_id = ?
-	ORDER BY word ASC`
-
+		typWordInfo.word,
+		pos.parts_of_speech,
+		types.word_type,
+		typWordInfo.typing_count,
+		typWordInfo.typing_miss_count
+	FROM (
+        SELECT word,typing_count,typing_miss_count
+        FROM v_typing_word_informations
+        WHERE user_id = ?
+	) typWordInfo
+    LEFT JOIN v_words words ON typWordInfo.word = words.word
+	LEFT JOIN v_parts_of_speeches pos ON words.parts_of_speech_id = pos.parts_of_speech_id
+	LEFT JOIN v_word_types types ON words.word_type_id = types.word_type_id
+	ORDER BY words.word ASC
+	`
 	// SELECT_ALPHABET_TYP_INFO_SQL : アルファベットのタイピング情報を取得するSQL
 	SELECT_ALPHABET_TYP_INFO_SQL = `
 	SELECT

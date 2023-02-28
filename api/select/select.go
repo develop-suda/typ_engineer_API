@@ -259,7 +259,7 @@ func GetWordTypInfo(db *sql.DB, userId def.UserIdStruct) ([]def.TypCount, error)
 	// 取得したデータを構造体に格納
 	for result.Next() {
 		typWordInfo := def.TypCount{}
-		if err := result.Scan(&typWordInfo.SuccessTypCount, &typWordInfo.MissTypCount); err != nil {
+		if err := result.Scan(&typWordInfo.Word, &typWordInfo.Parts_of_speech, &typWordInfo.Word_type, &typWordInfo.SuccessTypCount, &typWordInfo.MissTypCount); err != nil {
 			logs.WriteLog(err.Error(),
 				def.TypCount{
 					SuccessTypCount: typWordInfo.SuccessTypCount,
