@@ -79,7 +79,7 @@ func GetTypes(db *sql.DB) ([]def.WordType, error) {
 	// 複数件取得する場合、構造体を配列にする
 	var wordTypes []def.WordType
 
-	sql := "SELECT word_type FROM word_types ORDER BY word_type ASC"
+	sql := "SELECT word_type FROM v_word_types ORDER BY word_type ASC"
 
 	// SQL実行
 	result, err := db.Query(sql)
@@ -118,7 +118,7 @@ func GetPartsOfSpeeches(db *sql.DB) ([]def.PartsOfSpeech, error) {
 	var partsOfSpeeches []def.PartsOfSpeech
 	var err error
 
-	sql := "SELECT parts_of_speech FROM parts_of_speeches ORDER BY parts_of_speech ASC"
+	sql := "SELECT parts_of_speech FROM v_parts_of_speeches ORDER BY parts_of_speech ASC"
 
 	// SQL実行
 	result, err := db.Query(sql)
@@ -164,7 +164,7 @@ func MatchUserPassword(db *sql.DB, values def.UserMatchInfo) (string, error) {
 		return userId, err
 	}
 
-	sql := "SELECT LPAD(user_id,8,0) FROM users WHERE email = ? AND password = ?"
+	sql := "SELECT LPAD(user_id,8,0) FROM v_users WHERE email = ? AND password = ?"
 
 	// SQL実行
 	result := db.QueryRow(sql, values.Email, values.Password)
