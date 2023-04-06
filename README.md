@@ -76,11 +76,3 @@
   - リファクタリング必須
 
 - CSSが絶望的
-
-## 転職活動中です!!（2023年2月21日）
-
-### 興味があったら是非ご連絡ください
-
-- メールアドレス : developsuda@gmail.com
-- [Twitter](https://twitter.com/fumi_elephant)
-- [wantedly](https://www.wantedly.com/id/fumi_elephant)
